@@ -1,0 +1,362 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PostgreSQL 18 io_method — benchmark</title><style>
+:root{--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--sync:#2a78d6;--worker:#eb6834;--io_uring:#1baf7a;--page:#f9f9f7;--border:rgba(11,11,11,.10);--accent:#2a78d6;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--sync:#3987e5;--worker:#d95926;--io_uring:#199e70;--page:#0d0d0d;--border:rgba(255,255,255,.10);--accent:#6da7ec;color-scheme:dark}}
+:root[data-theme="dark"]{--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--sync:#3987e5;--worker:#d95926;--io_uring:#199e70;--page:#0d0d0d;--border:rgba(255,255,255,.10);--accent:#6da7ec;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink)}
+body{font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:var(--accent)}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding:40px 0 8px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+     font-size:14px;color:var(--ink2)}
+.top nav{display:flex;gap:8px;align-items:center}
+.btn{font:inherit;font-size:13px;color:var(--ink2);background:var(--surface);border:1px solid var(--border);
+     border-radius:999px;padding:4px 12px;text-decoration:none;cursor:pointer}
+.btn:hover{color:var(--ink)}
+h1{font-size:clamp(26px,4.4vw,38px);line-height:1.15;margin:28px 0 10px;letter-spacing:-.01em}
+.lede{font-size:18px;color:var(--ink2);margin:0 0 6px;max-width:680px}
+.src{font-size:13px;color:var(--muted)}
+h2{font-size:21px;margin:48px 0 12px;letter-spacing:-.005em}
+h2 small{font-weight:400;color:var(--muted);font-size:14px;margin-left:6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:28px 0 0}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.tile .lbl{font-size:13px;color:var(--ink2);min-height:2.9em}
+.tile .val{font-size:26px;font-weight:600;margin:4px 0 2px;display:flex;align-items:center;gap:8px}
+.tile .sub{font-size:13px;color:var(--ink2)}
+.key{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+.tile .key{width:12px;height:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin:12px 0;overflow:hidden}
+.card svg{display:block;width:100%;height:auto}
+.findings{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px 22px}
+.findings li{margin:8px 0}
+.note{font-size:14px;color:var(--ink2)}
+.tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 12px;border-bottom:1px solid var(--grid);text-align:left;white-space:nowrap}
+th{font-weight:600;color:var(--ink2);font-size:13px}
+tbody tr:last-child td{border-bottom:0}
+.r{text-align:right}.num{font-variant-numeric:tabular-nums}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 18px;font-size:15px;
+   background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:0}
+dt{color:var(--ink2)} dd{margin:0}
+code{font-size:.9em;background:var(--grid);padding:1px 5px;border-radius:4px}
+footer{margin:56px 0 40px;padding-top:16px;border-top:1px solid var(--border);font-size:13px;color:var(--muted)}
+#tip{position:fixed;pointer-events:none;z-index:9;background:var(--surface);color:var(--ink);
+     border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-size:13px;
+     box-shadow:0 4px 18px rgba(0,0,0,.18);max-width:320px;display:none}
+[data-tip]{cursor:default;outline:none}
+[data-tip]:focus-visible{stroke:var(--ink);stroke-width:1}
+@media (max-width:560px){dl{grid-template-columns:1fr}dt{margin-top:6px}
+  .card{overflow-x:auto;-webkit-overflow-scrolling:touch}.card svg{min-width:620px}}
+
+.bg{fill:var(--surface)} .grid{stroke:var(--grid);stroke-width:1}
+.axis{stroke:var(--axis);stroke-width:1} .ref{stroke:var(--ink2);stroke-width:1.5}
+.t1{fill:var(--ink)} .t2{fill:var(--ink2)} .tm{fill:var(--muted)}
+.wh{stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;opacity:.75}
+.m-sync{fill:var(--sync)} .m-worker{fill:var(--worker)} .m-io_uring{fill:var(--io_uring)}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent} .hit:hover+.mk,.hit:focus+.mk{opacity:.8}
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.num{font-variant-numeric:tabular-nums}
+</style></head><body><div class="wrap"><header><div class="top"><span>pg18-io-methods-lab</span><nav><a class="btn" href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab">Repozytorium</a><a class="btn" href="index.html" hreflang="en">English</a><button class="btn" id="theme" type="button" aria-label="theme">☾</button></nav></div><h1>Asynchroniczne I/O w PostgreSQL 18: sync vs worker vs io_uring</h1><p class="lede">Ta sama VM, ta sama tabela 13 GB, te same zapytania — zmienia się tylko <code>io_method</code>. Każdy pomiar sprawdza plan wykonania. W tej VM <code>sync</code> był najszybszy przy Bitmap Heap Scan i VACUUM na dwóch różnych kontrolerach dysku; zysk io_uring przy pełnych skanach zależał od kontrolera.</p><p class="src">147 przyjętych pomiarów · 0 odrzuconych · 7 przeplatanych serii · wygenerowano 2026-10-15</p></header><h2>Najszybszy tryb · główny pomiar (kontroler SATA), zimny cache</h2><div class="tiles"><div class="tile"><div class="lbl">T1a · Seq Scan, 1 proces</div><div class="val"><span class="key" style="background:var(--io_uring)"></span>io_uring</div><div class="sub">54,2 s · 1,09× szybciej</div></div><div class="tile"><div class="lbl">T1b · Parallel Seq Scan, 2 workery</div><div class="val"><span class="key" style="background:var(--io_uring)"></span>io_uring</div><div class="sub">34,5 s · 1,21× szybciej</div></div><div class="tile"><div class="lbl">T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy)</div><div class="val"><span class="key" style="background:var(--sync)"></span>sync</div><div class="sub">11,0 s · punkt odniesienia</div></div><div class="tile"><div class="lbl">T4 · VACUUM, 10 mln wierszy, 10% usuniętych</div><div class="val"><span class="key" style="background:var(--sync)"></span>sync</div><div class="sub">15,2 s · punkt odniesienia</div></div></div><h2>Najważniejsze wnioski</h2><div class="findings"><ul><li><strong>Bitmap Heap Scan i VACUUM były najszybsze z <code>sync</code> — na obu kontrolerach dysku.</strong> Główny pomiar (SATA): Bitmap Heap Scan <code>sync</code> 11,0 s, <code>io_uring</code> 1,53× wolniej, <code>worker</code> 2,05× wolniej; VACUUM <code>sync</code> 15,2 s, <code>io_uring</code> 1,20×, <code>worker</code> 1,41× wolniej. Test kontrolny (NVMe): ta sama kolejność, większe różnice — Bitmap 5,9 s wobec 1,98× i 2,58× wolniej, VACUUM 10,8 s wobec 1,31× i 1,54× wolniej. Każdy tryb czyta tych samych 53 866 bloków, a VACUUM wykonuje tę samą pracę (1 000 000 usuniętych krotek, 163 935 zamrożonych stron).</li><li><strong>Zysk io_uring przy pełnych skanach zależy od wirtualnego kontrolera dysku.</strong> Na SATA io_uring był najszybszy: <code>Seq Scan</code> 1,09× i <code>Parallel Seq Scan</code> 1,21× szybciej niż <code>sync</code>. Na NVMe skan równoległy z io_uring trwał 66,0 s — 1,52× <strong>wolniej</strong> niż <code>sync</code> (43,5 s). Wyniku z SATA nie należy traktować jako ogólnej cechy io_uring.</li><li><strong><code>worker</code> przy zimnych danych nigdy nie był szybszy od <code>sync</code>.</strong> Wyrównał <code>sync</code> przy skanie jednym procesem (58,4 wobec 59,1 s), a wszędzie indziej był wolniejszy, przy domyślnym <code>io_workers = 3</code> na 4 vCPU.</li><li><strong>Index Scan się nie zmienia</strong> (3,3–3,5 s): w PostgreSQL 18 asynchroniczne I/O obejmuje skany sekwencyjne, Bitmap Heap Scan i VACUUM (<a href="https://www.postgresql.org/docs/18/release-18.html">informacje o wydaniu</a>); Index Scan czyta strony tabeli pojedynczo.</li><li><strong>Ciepły cache nie pokazuje realnej różnicy.</strong> T2 63–71 ms, T3 4,5–6,1 ms przy 0 blokach czytanych z dysku; rozrzut między pomiarami (do 22%) jest większy niż różnice między trybami.</li><li><strong>Liczby są stabilne.</strong> Główny pomiar: 7 przeplatanych serii, współczynnik zmienności 0,5–2,8% (T3 <code>worker</code> 9%). Test kontrolny: 3 serie, rozrzut max–min do 3% poza jednym skanem równoległym <code>sync</code> (52,3 s wobec 43,4–43,5 s).</li><li><strong>Czego te wyniki nie mówią.</strong> To jedna VM w VirtualBox (4 vCPU, 3,6 GB RAM, cache I/O hosta wyłączony) z domyślnymi <code>io_workers = 3</code>, <code>effective_io_concurrency = 16</code>. Drugi pomiar pokazuje, że emulowana warstwa dyskowa zmienia obraz, więc te liczby opisują to środowisko, a nie Twój serwer. Kolejne zmienne do sprawdzenia, po jednej naraz: <code>effective_io_concurrency</code>, <code>io_workers</code>, dysk fizyczny bez wirtualizacji.</li></ul></div><h2>Przegląd · główny pomiar (SATA)</h2><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 274" width="760" height="274" role="img" aria-label="zimny cache: mediana czasu względem sync (mniej = szybciej)" class="chart"><rect class="bg" x="0" y="0" width="760" height="274" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">zimny cache: mediana czasu względem sync (mniej = szybciej)</text>
+<line class="ref" x1="16" y1="44" x2="34" y2="44"/><text class="t2" x="40" y="48" font-size="12">sync</text>
+<circle class="m-worker dot" cx="98" cy="44" r="6"/><text class="t2" x="110" y="48" font-size="12">worker</text>
+<circle class="m-io_uring dot" cx="198" cy="44" r="6"/><text class="t2" x="210" y="48" font-size="12">io_uring</text>
+<line class="grid" x1="260.0" y1="64" x2="260.0" y2="234"/>
+<text class="tm num" x="260.0" y="252" font-size="11" text-anchor="middle">0,0</text>
+<line class="grid" x1="362.2" y1="64" x2="362.2" y2="234"/>
+<text class="tm num" x="362.2" y="252" font-size="11" text-anchor="middle">0,5</text>
+<line class="grid" x1="464.4" y1="64" x2="464.4" y2="234"/>
+<text class="tm num" x="464.4" y="252" font-size="11" text-anchor="middle">1,0</text>
+<line class="grid" x1="566.7" y1="64" x2="566.7" y2="234"/>
+<text class="tm num" x="566.7" y="252" font-size="11" text-anchor="middle">1,5</text>
+<line class="grid" x1="668.9" y1="64" x2="668.9" y2="234"/>
+<text class="tm num" x="668.9" y="252" font-size="11" text-anchor="middle">2,0</text>
+<line class="ref" x1="464.4" y1="60" x2="464.4" y2="234"/>
+<text class="t2" x="246" y="85.0" font-size="12.5" text-anchor="end">T1a · Seq Scan</text>
+<circle class="hit" cx="462.0" cy="81.0" r="13" tabindex="0" data-tip="T1a · Seq Scan, 1 proces · zimny cache · worker: 58,4 s · ≈ sync"><title>T1a · Seq Scan, 1 proces · zimny cache · worker: 58,4 s · ≈ sync</title></circle><circle class="mk m-worker dot" cx="462.0" cy="81.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="447.6" cy="81.0" r="13" tabindex="0" data-tip="T1a · Seq Scan, 1 proces · zimny cache · io_uring: 54,2 s · 1,09× szybciej"><title>T1a · Seq Scan, 1 proces · zimny cache · io_uring: 54,2 s · 1,09× szybciej</title></circle><circle class="mk m-io_uring dot" cx="447.6" cy="81.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="119.0" font-size="12.5" text-anchor="end">T1b · Parallel Seq Scan</text>
+<line class="grid" x1="16" y1="98" x2="744" y2="98" opacity=".6"/>
+<circle class="hit" cx="542.8" cy="115.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · zimny cache · worker: 57,8 s · 1,38× wolniej"><title>T1b · Parallel Seq Scan, 2 workery · zimny cache · worker: 57,8 s · 1,38× wolniej</title></circle><circle class="mk m-worker dot" cx="542.8" cy="115.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="428.7" cy="115.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · zimny cache · io_uring: 34,5 s · 1,21× szybciej"><title>T1b · Parallel Seq Scan, 2 workery · zimny cache · io_uring: 34,5 s · 1,21× szybciej</title></circle><circle class="mk m-io_uring dot" cx="428.7" cy="115.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="153.0" font-size="12.5" text-anchor="end">T2 · Bitmap Heap Scan</text>
+<line class="grid" x1="16" y1="132" x2="744" y2="132" opacity=".6"/>
+<circle class="hit" cx="679.6" cy="149.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · worker: 22,5 s · 2,05× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · worker: 22,5 s · 2,05× wolniej</title></circle><circle class="mk m-worker dot" cx="679.6" cy="149.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="572.4" cy="149.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · io_uring: 16,8 s · 1,53× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · io_uring: 16,8 s · 1,53× wolniej</title></circle><circle class="mk m-io_uring dot" cx="572.4" cy="149.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="187.0" font-size="12.5" text-anchor="end">T3 · Index Scan</text>
+<line class="grid" x1="16" y1="166" x2="744" y2="166" opacity=".6"/>
+<circle class="hit" cx="474.7" cy="183.0" r="13" tabindex="0" data-tip="T3 · Index Scan, 5000 wierszy · zimny cache · worker: 3,51 s · 1,05× wolniej"><title>T3 · Index Scan, 5000 wierszy · zimny cache · worker: 3,51 s · 1,05× wolniej</title></circle><circle class="mk m-worker dot" cx="474.7" cy="183.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="464.9" cy="183.0" r="13" tabindex="0" data-tip="T3 · Index Scan, 5000 wierszy · zimny cache · io_uring: 3,35 s · ≈ sync"><title>T3 · Index Scan, 5000 wierszy · zimny cache · io_uring: 3,35 s · ≈ sync</title></circle><circle class="mk m-io_uring dot" cx="464.9" cy="183.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="221.0" font-size="12.5" text-anchor="end">T4 · VACUUM</text>
+<line class="grid" x1="16" y1="200" x2="744" y2="200" opacity=".6"/>
+<circle class="hit" cx="548.6" cy="217.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · worker: 21,4 s · 1,41× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · worker: 21,4 s · 1,41× wolniej</title></circle><circle class="mk m-worker dot" cx="548.6" cy="217.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="505.3" cy="217.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · io_uring: 18,2 s · 1,20× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · io_uring: 18,2 s · 1,20× wolniej</title></circle><circle class="mk m-io_uring dot" cx="505.3" cy="217.0" r="6" pointer-events="none"/>
+</svg></div><h2>Test kontrolny: dysk danych na kontrolerze NVMe<small>zmieniona jedna zmienna: wirtualny kontroler dysku VM (SATA/AHCI → NVMe); 3 serie, zimny cache</small></h2><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 284" width="760" height="284" role="img" aria-label="mediana czasu względem sync, dla każdego kontrolera dysku (mniej = szybciej)" class="chart"><rect class="bg" x="0" y="0" width="760" height="284" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">mediana czasu względem sync, dla każdego kontrolera dysku (mniej = szybciej)</text>
+<line class="ref" x1="16" y1="44" x2="34" y2="44"/><text class="t2" x="40" y="48" font-size="12">sync</text>
+<circle class="m-worker dot" cx="98" cy="44" r="6"/><text class="t2" x="110" y="48" font-size="12">worker</text>
+<circle class="m-io_uring dot" cx="198" cy="44" r="6"/><text class="t2" x="210" y="48" font-size="12">io_uring</text>
+<line class="grid" x1="260.0" y1="64" x2="260.0" y2="244"/>
+<text class="tm num" x="260.0" y="262" font-size="11" text-anchor="middle">0,0</text>
+<line class="grid" x1="343.6" y1="64" x2="343.6" y2="244"/>
+<text class="tm num" x="343.6" y="262" font-size="11" text-anchor="middle">0,5</text>
+<line class="grid" x1="427.3" y1="64" x2="427.3" y2="244"/>
+<text class="tm num" x="427.3" y="262" font-size="11" text-anchor="middle">1,0</text>
+<line class="grid" x1="510.9" y1="64" x2="510.9" y2="244"/>
+<text class="tm num" x="510.9" y="262" font-size="11" text-anchor="middle">1,5</text>
+<line class="grid" x1="594.5" y1="64" x2="594.5" y2="244"/>
+<text class="tm num" x="594.5" y="262" font-size="11" text-anchor="middle">2,0</text>
+<line class="grid" x1="678.2" y1="64" x2="678.2" y2="244"/>
+<text class="tm num" x="678.2" y="262" font-size="11" text-anchor="middle">2,5</text>
+<line class="ref" x1="427.3" y1="60" x2="427.3" y2="244"/>
+<text class="t2" x="246" y="83.0" font-size="12.5" text-anchor="end">T1b · Parallel Seq Scan · SATA</text>
+<circle class="hit" cx="491.4" cy="79.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · SATA · worker: 57,8 s · 1,38× wolniej"><title>T1b · Parallel Seq Scan, 2 workery · SATA · worker: 57,8 s · 1,38× wolniej</title></circle><circle class="mk m-worker dot" cx="491.4" cy="79.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="398.1" cy="79.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · SATA · io_uring: 34,5 s · 1,21× szybciej"><title>T1b · Parallel Seq Scan, 2 workery · SATA · io_uring: 34,5 s · 1,21× szybciej</title></circle><circle class="mk m-io_uring dot" cx="398.1" cy="79.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="113.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="484.6" cy="109.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · NVMe · worker: 58,4 s · 1,34× wolniej"><title>T1b · Parallel Seq Scan, 2 workery · NVMe · worker: 58,4 s · 1,34× wolniej</title></circle><circle class="mk m-worker dot" cx="484.6" cy="109.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="513.5" cy="109.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · NVMe · io_uring: 66,0 s · 1,52× wolniej"><title>T1b · Parallel Seq Scan, 2 workery · NVMe · io_uring: 66,0 s · 1,52× wolniej</title></circle><circle class="mk m-io_uring dot" cx="513.5" cy="109.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="143.0" font-size="12.5" text-anchor="end">T2 · Bitmap Heap Scan · SATA</text>
+<line class="grid" x1="16" y1="124" x2="744" y2="124"/>
+<circle class="hit" cx="603.3" cy="139.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · SATA · worker: 22,5 s · 2,05× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · SATA · worker: 22,5 s · 2,05× wolniej</title></circle><circle class="mk m-worker dot" cx="603.3" cy="139.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="515.6" cy="139.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · SATA · io_uring: 16,8 s · 1,53× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · SATA · io_uring: 16,8 s · 1,53× wolniej</title></circle><circle class="mk m-io_uring dot" cx="515.6" cy="139.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="173.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="692.1" cy="169.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · NVMe · worker: 15,3 s · 2,58× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · NVMe · worker: 15,3 s · 2,58× wolniej</title></circle><circle class="mk m-worker dot" cx="692.1" cy="169.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="590.4" cy="169.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · NVMe · io_uring: 11,7 s · 1,98× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · NVMe · io_uring: 11,7 s · 1,98× wolniej</title></circle><circle class="mk m-io_uring dot" cx="590.4" cy="169.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="203.0" font-size="12.5" text-anchor="end">T4 · VACUUM · SATA</text>
+<line class="grid" x1="16" y1="184" x2="744" y2="184"/>
+<circle class="hit" cx="496.1" cy="199.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · SATA · worker: 21,4 s · 1,41× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · SATA · worker: 21,4 s · 1,41× wolniej</title></circle><circle class="mk m-worker dot" cx="496.1" cy="199.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="460.7" cy="199.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · SATA · io_uring: 18,2 s · 1,20× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · SATA · io_uring: 18,2 s · 1,20× wolniej</title></circle><circle class="mk m-io_uring dot" cx="460.7" cy="199.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="233.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="518.0" cy="229.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · NVMe · worker: 16,7 s · 1,54× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · NVMe · worker: 16,7 s · 1,54× wolniej</title></circle><circle class="mk m-worker dot" cx="518.0" cy="229.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="479.4" cy="229.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · NVMe · io_uring: 14,2 s · 1,31× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · NVMe · io_uring: 14,2 s · 1,31× wolniej</title></circle><circle class="mk m-io_uring dot" cx="479.4" cy="229.0" r="6" pointer-events="none"/>
+</svg></div><p class="note">Ta sama VM, dane, ustawienia PostgreSQL i zapytania; jedynie dysk danych przeniesiono z emulowanego kontrolera SATA (AHCI) na emulowany kontroler NVMe (na obu cache I/O hosta wyłączony). Źródło: results/control_nvme/raw_20261015_164202.csv · 27 pomiarów · 0 odrzuconych.</p><div class="tablewrap"><table><thead><tr><th>Test</th><th>io_method</th><th class="r">Mediana SATA</th><th class="r">Mediana NVMe</th><th class="r">SATA vs sync</th><th class="r">NVMe vs sync</th></tr></thead><tbody><tr><td class="">T1b</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">41,8 s</td><td class="r num">43,5 s (n=3)</td><td class="r num">punkt odniesienia</td><td class="r num">punkt odniesienia</td></tr><tr><td class="">T1b</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">57,8 s</td><td class="r num">58,4 s (n=3)</td><td class="r num">1,38× wolniej</td><td class="r num">1,34× wolniej</td></tr><tr><td class="">T1b</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">34,5 s</td><td class="r num">66,0 s (n=3)</td><td class="r num">1,21× szybciej</td><td class="r num">1,52× wolniej</td></tr><tr><td class="">T2</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">11,0 s</td><td class="r num">5,91 s (n=3)</td><td class="r num">punkt odniesienia</td><td class="r num">punkt odniesienia</td></tr><tr><td class="">T2</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">22,5 s</td><td class="r num">15,3 s (n=3)</td><td class="r num">2,05× wolniej</td><td class="r num">2,58× wolniej</td></tr><tr><td class="">T2</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">16,8 s</td><td class="r num">11,7 s (n=3)</td><td class="r num">1,53× wolniej</td><td class="r num">1,98× wolniej</td></tr><tr><td class="">T4</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">15,2 s</td><td class="r num">10,8 s (n=3)</td><td class="r num">punkt odniesienia</td><td class="r num">punkt odniesienia</td></tr><tr><td class="">T4</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">21,4 s</td><td class="r num">16,7 s (n=3)</td><td class="r num">1,41× wolniej</td><td class="r num">1,54× wolniej</td></tr><tr><td class="">T4</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">18,2 s</td><td class="r num">14,2 s (n=3)</td><td class="r num">1,20× wolniej</td><td class="r num">1,31× wolniej</td></tr></tbody></table></div><h2>Zimny cache · główny pomiar<small>restart PostgreSQL i wyczyszczony cache stron systemu przed każdym pomiarem</small></h2><p class="note">Słupek = mediana · wąsy = min–max · najedź na słupek, by zobaczyć szczegóły.</p><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T1a · Seq Scan, 1 proces — zimny cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T1a · Seq Scan, 1 proces — zimny cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="206.5" y1="40" x2="206.5" y2="166"/>
+<text class="tm num" x="206.5" y="184" font-size="11" text-anchor="middle">20</text>
+<line class="grid" x1="321.0" y1="40" x2="321.0" y2="166"/>
+<text class="tm num" x="321.0" y="184" font-size="11" text-anchor="middle">40</text>
+<line class="grid" x1="435.5" y1="40" x2="435.5" y2="166"/>
+<text class="tm num" x="435.5" y="184" font-size="11" text-anchor="middle">60</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">80 s</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 59,1 s · min–max 58,2 s–61,4 s · n=7 · punkt odniesienia"><title>sync · mediana 59,1 s · min–max 58,2 s–61,4 s · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H426.3Q430.3,55.0 430.3,59.0V73.0Q430.3,77.0 426.3,77.0H92.0Z"/>
+<line class="wh" x1="425.2" y1="66.0" x2="443.7" y2="66.0"/><line class="wh" x1="425.2" y1="61.0" x2="425.2" y2="71.0"/><line class="wh" x1="443.7" y1="61.0" x2="443.7" y2="71.0"/></g>
+<text class="t1 num" x="453.7" y="70.0" font-size="13" font-weight="600">59,1 s<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 58,4 s · min–max 57,2 s–59,1 s · n=7 · ≈ sync"><title>worker · mediana 58,4 s · min–max 57,2 s–59,1 s · n=7 · ≈ sync</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H422.2Q426.2,95.0 426.2,99.0V113.0Q426.2,117.0 422.2,117.0H92.0Z"/>
+<line class="wh" x1="419.4" y1="106.0" x2="430.4" y2="106.0"/><line class="wh" x1="419.4" y1="101.0" x2="419.4" y2="111.0"/><line class="wh" x1="430.4" y1="101.0" x2="430.4" y2="111.0"/></g>
+<text class="t1 num" x="440.4" y="110.0" font-size="13" font-weight="600">58,4 s<tspan class="t2" font-weight="400"> · ≈ sync</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 54,2 s · min–max 53,4 s–55,0 s · n=7 · 1,09× szybciej"><title>io_uring · mediana 54,2 s · min–max 53,4 s–55,0 s · n=7 · 1,09× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H398.5Q402.5,135.0 402.5,139.0V153.0Q402.5,157.0 398.5,157.0H92.0Z"/>
+<line class="wh" x1="397.8" y1="146.0" x2="406.8" y2="146.0"/><line class="wh" x1="397.8" y1="141.0" x2="397.8" y2="151.0"/><line class="wh" x1="406.8" y1="141.0" x2="406.8" y2="151.0"/></g>
+<text class="t1 num" x="416.8" y="150.0" font-size="13" font-weight="600">54,2 s<tspan class="t2" font-weight="400"> · 1,09× szybciej</tspan></text>
+</svg></div><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T1b · Parallel Seq Scan, 2 workery — zimny cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T1b · Parallel Seq Scan, 2 workery — zimny cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="206.5" y1="40" x2="206.5" y2="166"/>
+<text class="tm num" x="206.5" y="184" font-size="11" text-anchor="middle">20</text>
+<line class="grid" x1="321.0" y1="40" x2="321.0" y2="166"/>
+<text class="tm num" x="321.0" y="184" font-size="11" text-anchor="middle">40</text>
+<line class="grid" x1="435.5" y1="40" x2="435.5" y2="166"/>
+<text class="tm num" x="435.5" y="184" font-size="11" text-anchor="middle">60</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">80 s</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 41,8 s · min–max 41,2 s–42,0 s · n=7 · punkt odniesienia"><title>sync · mediana 41,8 s · min–max 41,2 s–42,0 s · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H327.1Q331.1,55.0 331.1,59.0V73.0Q331.1,77.0 327.1,77.0H92.0Z"/>
+<line class="wh" x1="327.9" y1="66.0" x2="332.3" y2="66.0"/><line class="wh" x1="327.9" y1="61.0" x2="327.9" y2="71.0"/><line class="wh" x1="332.3" y1="61.0" x2="332.3" y2="71.0"/></g>
+<text class="t1 num" x="342.3" y="70.0" font-size="13" font-weight="600">41,8 s<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 57,8 s · min–max 57,5 s–60,1 s · n=7 · 1,38× wolniej"><title>worker · mediana 57,8 s · min–max 57,5 s–60,1 s · n=7 · 1,38× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H418.7Q422.7,95.0 422.7,99.0V113.0Q422.7,117.0 418.7,117.0H92.0Z"/>
+<line class="wh" x1="421.0" y1="106.0" x2="436.3" y2="106.0"/><line class="wh" x1="421.0" y1="101.0" x2="421.0" y2="111.0"/><line class="wh" x1="436.3" y1="101.0" x2="436.3" y2="111.0"/></g>
+<text class="t1 num" x="446.3" y="110.0" font-size="13" font-weight="600">57,8 s<tspan class="t2" font-weight="400"> · 1,38× wolniej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 34,5 s · min–max 34,2 s–34,9 s · n=7 · 1,21× szybciej"><title>io_uring · mediana 34,5 s · min–max 34,2 s–34,9 s · n=7 · 1,21× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H285.3Q289.3,135.0 289.3,139.0V153.0Q289.3,157.0 285.3,157.0H92.0Z"/>
+<line class="wh" x1="287.7" y1="146.0" x2="291.7" y2="146.0"/><line class="wh" x1="287.7" y1="141.0" x2="287.7" y2="151.0"/><line class="wh" x1="291.7" y1="141.0" x2="291.7" y2="151.0"/></g>
+<text class="t1 num" x="301.7" y="150.0" font-size="13" font-weight="600">34,5 s<tspan class="t2" font-weight="400"> · 1,21× szybciej</tspan></text>
+</svg></div><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) — zimny cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) — zimny cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="183.6" y1="40" x2="183.6" y2="166"/>
+<text class="tm num" x="183.6" y="184" font-size="11" text-anchor="middle">5</text>
+<line class="grid" x1="275.2" y1="40" x2="275.2" y2="166"/>
+<text class="tm num" x="275.2" y="184" font-size="11" text-anchor="middle">10</text>
+<line class="grid" x1="366.8" y1="40" x2="366.8" y2="166"/>
+<text class="tm num" x="366.8" y="184" font-size="11" text-anchor="middle">15</text>
+<line class="grid" x1="458.4" y1="40" x2="458.4" y2="166"/>
+<text class="tm num" x="458.4" y="184" font-size="11" text-anchor="middle">20</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">25 s</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 11,0 s · min–max 10,8 s–11,4 s · n=7 · punkt odniesienia"><title>sync · mediana 11,0 s · min–max 10,8 s–11,4 s · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H288.9Q292.9,55.0 292.9,59.0V73.0Q292.9,77.0 288.9,77.0H92.0Z"/>
+<line class="wh" x1="290.6" y1="66.0" x2="301.7" y2="66.0"/><line class="wh" x1="290.6" y1="61.0" x2="290.6" y2="71.0"/><line class="wh" x1="301.7" y1="61.0" x2="301.7" y2="71.0"/></g>
+<text class="t1 num" x="311.7" y="70.0" font-size="13" font-weight="600">11,0 s<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 22,5 s · min–max 22,3 s–22,9 s · n=7 · 2,05× wolniej"><title>worker · mediana 22,5 s · min–max 22,3 s–22,9 s · n=7 · 2,05× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H500.4Q504.4,95.0 504.4,99.0V113.0Q504.4,117.0 500.4,117.0H92.0Z"/>
+<line class="wh" x1="501.2" y1="106.0" x2="511.3" y2="106.0"/><line class="wh" x1="501.2" y1="101.0" x2="501.2" y2="111.0"/><line class="wh" x1="511.3" y1="101.0" x2="511.3" y2="111.0"/></g>
+<text class="t1 num" x="521.3" y="110.0" font-size="13" font-weight="600">22,5 s<tspan class="t2" font-weight="400"> · 2,05× wolniej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 16,8 s · min–max 16,6 s–16,9 s · n=7 · 1,53× wolniej"><title>io_uring · mediana 16,8 s · min–max 16,6 s–16,9 s · n=7 · 1,53× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H395.0Q399.0,135.0 399.0,139.0V153.0Q399.0,157.0 395.0,157.0H92.0Z"/>
+<line class="wh" x1="396.6" y1="146.0" x2="402.3" y2="146.0"/><line class="wh" x1="396.6" y1="141.0" x2="396.6" y2="151.0"/><line class="wh" x1="402.3" y1="141.0" x2="402.3" y2="151.0"/></g>
+<text class="t1 num" x="412.3" y="150.0" font-size="13" font-weight="600">16,8 s<tspan class="t2" font-weight="400"> · 1,53× wolniej</tspan></text>
+</svg></div><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T3 · Index Scan, 5000 wierszy — zimny cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T3 · Index Scan, 5000 wierszy — zimny cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="183.6" y1="40" x2="183.6" y2="166"/>
+<text class="tm num" x="183.6" y="184" font-size="11" text-anchor="middle">1</text>
+<line class="grid" x1="275.2" y1="40" x2="275.2" y2="166"/>
+<text class="tm num" x="275.2" y="184" font-size="11" text-anchor="middle">2</text>
+<line class="grid" x1="366.8" y1="40" x2="366.8" y2="166"/>
+<text class="tm num" x="366.8" y="184" font-size="11" text-anchor="middle">3</text>
+<line class="grid" x1="458.4" y1="40" x2="458.4" y2="166"/>
+<text class="tm num" x="458.4" y="184" font-size="11" text-anchor="middle">4</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">5 s</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 3,34 s · min–max 3,24 s–3,49 s · n=7 · punkt odniesienia"><title>sync · mediana 3,34 s · min–max 3,24 s–3,49 s · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H394.4Q398.4,55.0 398.4,59.0V73.0Q398.4,77.0 394.4,77.0H92.0Z"/>
+<line class="wh" x1="388.8" y1="66.0" x2="411.9" y2="66.0"/><line class="wh" x1="388.8" y1="61.0" x2="388.8" y2="71.0"/><line class="wh" x1="411.9" y1="61.0" x2="411.9" y2="71.0"/></g>
+<text class="t1 num" x="421.9" y="70.0" font-size="13" font-weight="600">3,34 s<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 3,51 s · min–max 3,23 s–4,13 s · n=7 · 1,05× wolniej"><title>worker · mediana 3,51 s · min–max 3,23 s–4,13 s · n=7 · 1,05× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H409.8Q413.8,95.0 413.8,99.0V113.0Q413.8,117.0 409.8,117.0H92.0Z"/>
+<line class="wh" x1="388.1" y1="106.0" x2="470.4" y2="106.0"/><line class="wh" x1="388.1" y1="101.0" x2="388.1" y2="111.0"/><line class="wh" x1="470.4" y1="101.0" x2="470.4" y2="111.0"/></g>
+<text class="t1 num" x="480.4" y="110.0" font-size="13" font-weight="600">3,51 s<tspan class="t2" font-weight="400"> · 1,05× wolniej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 3,35 s · min–max 3,23 s–3,52 s · n=7 · ≈ sync"><title>io_uring · mediana 3,35 s · min–max 3,23 s–3,52 s · n=7 · ≈ sync</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H395.1Q399.1,135.0 399.1,139.0V153.0Q399.1,157.0 395.1,157.0H92.0Z"/>
+<line class="wh" x1="388.0" y1="146.0" x2="414.2" y2="146.0"/><line class="wh" x1="388.0" y1="141.0" x2="388.0" y2="151.0"/><line class="wh" x1="414.2" y1="141.0" x2="414.2" y2="151.0"/></g>
+<text class="t1 num" x="424.2" y="150.0" font-size="13" font-weight="600">3,35 s<tspan class="t2" font-weight="400"> · ≈ sync</tspan></text>
+</svg></div><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T4 · VACUUM, 10 mln wierszy, 10% usuniętych — zimny cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T4 · VACUUM, 10 mln wierszy, 10% usuniętych — zimny cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="183.6" y1="40" x2="183.6" y2="166"/>
+<text class="tm num" x="183.6" y="184" font-size="11" text-anchor="middle">5</text>
+<line class="grid" x1="275.2" y1="40" x2="275.2" y2="166"/>
+<text class="tm num" x="275.2" y="184" font-size="11" text-anchor="middle">10</text>
+<line class="grid" x1="366.8" y1="40" x2="366.8" y2="166"/>
+<text class="tm num" x="366.8" y="184" font-size="11" text-anchor="middle">15</text>
+<line class="grid" x1="458.4" y1="40" x2="458.4" y2="166"/>
+<text class="tm num" x="458.4" y="184" font-size="11" text-anchor="middle">20</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">25 s</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 15,2 s · min–max 15,0 s–16,2 s · n=7 · punkt odniesienia"><title>sync · mediana 15,2 s · min–max 15,0 s–16,2 s · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H366.0Q370.0,55.0 370.0,59.0V73.0Q370.0,77.0 366.0,77.0H92.0Z"/>
+<line class="wh" x1="366.3" y1="66.0" x2="388.8" y2="66.0"/><line class="wh" x1="366.3" y1="61.0" x2="366.3" y2="71.0"/><line class="wh" x1="388.8" y1="61.0" x2="388.8" y2="71.0"/></g>
+<text class="t1 num" x="398.8" y="70.0" font-size="13" font-weight="600">15,2 s<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 21,4 s · min–max 20,9 s–22,0 s · n=7 · 1,41× wolniej"><title>worker · mediana 21,4 s · min–max 20,9 s–22,0 s · n=7 · 1,41× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H480.4Q484.4,95.0 484.4,99.0V113.0Q484.4,117.0 480.4,117.0H92.0Z"/>
+<line class="wh" x1="474.7" y1="106.0" x2="495.1" y2="106.0"/><line class="wh" x1="474.7" y1="101.0" x2="474.7" y2="111.0"/><line class="wh" x1="495.1" y1="101.0" x2="495.1" y2="111.0"/></g>
+<text class="t1 num" x="505.1" y="110.0" font-size="13" font-weight="600">21,4 s<tspan class="t2" font-weight="400"> · 1,41× wolniej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 18,2 s · min–max 18,0 s–18,5 s · n=7 · 1,20× wolniej"><title>io_uring · mediana 18,2 s · min–max 18,0 s–18,5 s · n=7 · 1,20× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H421.5Q425.5,135.0 425.5,139.0V153.0Q425.5,157.0 421.5,157.0H92.0Z"/>
+<line class="wh" x1="421.2" y1="146.0" x2="431.1" y2="146.0"/><line class="wh" x1="421.2" y1="141.0" x2="421.2" y2="151.0"/><line class="wh" x1="431.1" y1="141.0" x2="431.1" y2="151.0"/></g>
+<text class="t1 num" x="441.1" y="150.0" font-size="13" font-weight="600">18,2 s<tspan class="t2" font-weight="400"> · 1,20× wolniej</tspan></text>
+</svg></div><h2>Ciepły cache · główny pomiar<small>dane już w shared_buffers</small></h2><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) — ciepły cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) — ciepły cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="183.6" y1="40" x2="183.6" y2="166"/>
+<text class="tm num" x="183.6" y="184" font-size="11" text-anchor="middle">20</text>
+<line class="grid" x1="275.2" y1="40" x2="275.2" y2="166"/>
+<text class="tm num" x="275.2" y="184" font-size="11" text-anchor="middle">40</text>
+<line class="grid" x1="366.8" y1="40" x2="366.8" y2="166"/>
+<text class="tm num" x="366.8" y="184" font-size="11" text-anchor="middle">60</text>
+<line class="grid" x1="458.4" y1="40" x2="458.4" y2="166"/>
+<text class="tm num" x="458.4" y="184" font-size="11" text-anchor="middle">80</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">100 ms</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 67,4 ms · min–max 59,0 ms–71,9 ms · n=7 · punkt odniesienia"><title>sync · mediana 67,4 ms · min–max 59,0 ms–71,9 ms · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H396.6Q400.6,55.0 400.6,59.0V73.0Q400.6,77.0 396.6,77.0H92.0Z"/>
+<line class="wh" x1="362.2" y1="66.0" x2="421.4" y2="66.0"/><line class="wh" x1="362.2" y1="61.0" x2="362.2" y2="71.0"/><line class="wh" x1="421.4" y1="61.0" x2="421.4" y2="71.0"/></g>
+<text class="t1 num" x="431.4" y="70.0" font-size="13" font-weight="600">67,4 ms<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 63,4 ms · min–max 56,5 ms–68,5 ms · n=7 · 1,06× szybciej"><title>worker · mediana 63,4 ms · min–max 56,5 ms–68,5 ms · n=7 · 1,06× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H378.3Q382.3,95.0 382.3,99.0V113.0Q382.3,117.0 378.3,117.0H92.0Z"/>
+<line class="wh" x1="350.7" y1="106.0" x2="405.7" y2="106.0"/><line class="wh" x1="350.7" y1="101.0" x2="350.7" y2="111.0"/><line class="wh" x1="405.7" y1="101.0" x2="405.7" y2="111.0"/></g>
+<text class="t1 num" x="415.7" y="110.0" font-size="13" font-weight="600">63,4 ms<tspan class="t2" font-weight="400"> · 1,06× szybciej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 70,9 ms · min–max 61,1 ms–81,4 ms · n=7 · 1,05× wolniej"><title>io_uring · mediana 70,9 ms · min–max 61,1 ms–81,4 ms · n=7 · 1,05× wolniej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H412.9Q416.9,135.0 416.9,139.0V153.0Q416.9,157.0 412.9,157.0H92.0Z"/>
+<line class="wh" x1="372.0" y1="146.0" x2="464.7" y2="146.0"/><line class="wh" x1="372.0" y1="141.0" x2="372.0" y2="151.0"/><line class="wh" x1="464.7" y1="141.0" x2="464.7" y2="151.0"/></g>
+<text class="t1 num" x="474.7" y="150.0" font-size="13" font-weight="600">70,9 ms<tspan class="t2" font-weight="400"> · 1,05× wolniej</tspan></text>
+</svg></div><div class="card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T3 · Index Scan, 5000 wierszy — ciepły cache" class="chart"><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T3 · Index Scan, 5000 wierszy — ciepły cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="206.5" y1="40" x2="206.5" y2="166"/>
+<text class="tm num" x="206.5" y="184" font-size="11" text-anchor="middle">2</text>
+<line class="grid" x1="321.0" y1="40" x2="321.0" y2="166"/>
+<text class="tm num" x="321.0" y="184" font-size="11" text-anchor="middle">4</text>
+<line class="grid" x1="435.5" y1="40" x2="435.5" y2="166"/>
+<text class="tm num" x="435.5" y="184" font-size="11" text-anchor="middle">6</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">8 ms</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 6,1 ms · min–max 4,1 ms–6,9 ms · n=7 · punkt odniesienia"><title>sync · mediana 6,1 ms · min–max 4,1 ms–6,9 ms · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H437.2Q441.2,55.0 441.2,59.0V73.0Q441.2,77.0 437.2,77.0H92.0Z"/>
+<line class="wh" x1="324.8" y1="66.0" x2="486.5" y2="66.0"/><line class="wh" x1="324.8" y1="61.0" x2="324.8" y2="71.0"/><line class="wh" x1="486.5" y1="61.0" x2="486.5" y2="71.0"/></g>
+<text class="t1 num" x="496.5" y="70.0" font-size="13" font-weight="600">6,1 ms<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 4,5 ms · min–max 3,6 ms–6,6 ms · n=7 · 1,35× szybciej"><title>worker · mediana 4,5 ms · min–max 3,6 ms–6,6 ms · n=7 · 1,35× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H347.2Q351.2,95.0 351.2,99.0V113.0Q351.2,117.0 347.2,117.0H92.0Z"/>
+<line class="wh" x1="299.6" y1="106.0" x2="467.2" y2="106.0"/><line class="wh" x1="299.6" y1="101.0" x2="299.6" y2="111.0"/><line class="wh" x1="467.2" y1="101.0" x2="467.2" y2="111.0"/></g>
+<text class="t1 num" x="477.2" y="110.0" font-size="13" font-weight="600">4,5 ms<tspan class="t2" font-weight="400"> · 1,35× szybciej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 5,7 ms · min–max 4,9 ms–6,5 ms · n=7 · 1,06× szybciej"><title>io_uring · mediana 5,7 ms · min–max 4,9 ms–6,5 ms · n=7 · 1,06× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H416.7Q420.7,135.0 420.7,139.0V153.0Q420.7,157.0 416.7,157.0H92.0Z"/>
+<line class="wh" x1="372.5" y1="146.0" x2="461.9" y2="146.0"/><line class="wh" x1="372.5" y1="141.0" x2="372.5" y2="151.0"/><line class="wh" x1="461.9" y1="141.0" x2="461.9" y2="151.0"/></g>
+<text class="t1 num" x="471.9" y="150.0" font-size="13" font-weight="600">5,7 ms<tspan class="t2" font-weight="400"> · 1,06× szybciej</tspan></text>
+</svg></div><h2>Wszystkie liczby</h2><p class="note">Mediana, min, max i p90 z 7 przeplatanych serii. vs sync = stosunek median. Odczyt I/O = mediana I/O Timings: shared read z EXPLAIN (ANALYZE, BUFFERS); przy równoległych workerach lub asynchronicznym I/O to suma oczekiwań wielu procesów, a nie czas zegarowy.</p><div class="tablewrap"><table><thead><tr><th>Test</th><th>Cache</th><th>io_method</th><th class="r">n</th><th class="r">Mediana</th><th class="r">Min</th><th class="r">Max</th><th class="r">p90</th><th class="r">vs sync</th><th class="r">Odczyt I/O</th></tr></thead><tbody><tr><td class="">T1a</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">59,1 s</td><td class="r num">58,2 s</td><td class="r num">61,4 s</td><td class="r num">61,4 s</td><td class="r num">punkt odniesienia</td><td class="r num">51,6 s</td></tr><tr><td class="">T1a</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">58,4 s</td><td class="r num">57,2 s</td><td class="r num">59,1 s</td><td class="r num">59,1 s</td><td class="r num">≈ sync</td><td class="r num">30,7 s</td></tr><tr><td class="">T1a</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">54,2 s</td><td class="r num">53,4 s</td><td class="r num">55,0 s</td><td class="r num">55,0 s</td><td class="r num">1,09× szybciej</td><td class="r num">15,6 s</td></tr><tr><td class="">T1b</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">41,8 s</td><td class="r num">41,2 s</td><td class="r num">42,0 s</td><td class="r num">42,0 s</td><td class="r num">punkt odniesienia</td><td class="r num">111,0 s</td></tr><tr><td class="">T1b</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">57,8 s</td><td class="r num">57,5 s</td><td class="r num">60,1 s</td><td class="r num">60,1 s</td><td class="r num">1,38× wolniej</td><td class="r num">144,1 s</td></tr><tr><td class="">T1b</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">34,5 s</td><td class="r num">34,2 s</td><td class="r num">34,9 s</td><td class="r num">34,9 s</td><td class="r num">1,21× szybciej</td><td class="r num">71,0 s</td></tr><tr><td class="">T2</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">11,0 s</td><td class="r num">10,8 s</td><td class="r num">11,4 s</td><td class="r num">11,4 s</td><td class="r num">punkt odniesienia</td><td class="r num">3,08 s</td></tr><tr><td class="">T2</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">22,5 s</td><td class="r num">22,3 s</td><td class="r num">22,9 s</td><td class="r num">22,9 s</td><td class="r num">2,05× wolniej</td><td class="r num">21,0 s</td></tr><tr><td class="">T2</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">16,8 s</td><td class="r num">16,6 s</td><td class="r num">16,9 s</td><td class="r num">16,9 s</td><td class="r num">1,53× wolniej</td><td class="r num">14,4 s</td></tr><tr><td class="">T3</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">3,34 s</td><td class="r num">3,24 s</td><td class="r num">3,49 s</td><td class="r num">3,49 s</td><td class="r num">punkt odniesienia</td><td class="r num">3,32 s</td></tr><tr><td class="">T3</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">3,51 s</td><td class="r num">3,23 s</td><td class="r num">4,13 s</td><td class="r num">4,13 s</td><td class="r num">1,05× wolniej</td><td class="r num">3,49 s</td></tr><tr><td class="">T3</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">3,35 s</td><td class="r num">3,23 s</td><td class="r num">3,52 s</td><td class="r num">3,52 s</td><td class="r num">≈ sync</td><td class="r num">3,33 s</td></tr><tr><td class="">T4</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">15,2 s</td><td class="r num">15,0 s</td><td class="r num">16,2 s</td><td class="r num">16,2 s</td><td class="r num">punkt odniesienia</td><td class="r num">—</td></tr><tr><td class="">T4</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">21,4 s</td><td class="r num">20,9 s</td><td class="r num">22,0 s</td><td class="r num">22,0 s</td><td class="r num">1,41× wolniej</td><td class="r num">—</td></tr><tr><td class="">T4</td><td class="">zimny cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">18,2 s</td><td class="r num">18,0 s</td><td class="r num">18,5 s</td><td class="r num">18,5 s</td><td class="r num">1,20× wolniej</td><td class="r num">—</td></tr><tr><td class="">T2</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">67,4 ms</td><td class="r num">59,0 ms</td><td class="r num">71,9 ms</td><td class="r num">71,9 ms</td><td class="r num">punkt odniesienia</td><td class="r num">0,0 ms</td></tr><tr><td class="">T2</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">63,4 ms</td><td class="r num">56,5 ms</td><td class="r num">68,5 ms</td><td class="r num">68,5 ms</td><td class="r num">1,06× szybciej</td><td class="r num">0,0 ms</td></tr><tr><td class="">T2</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">70,9 ms</td><td class="r num">61,1 ms</td><td class="r num">81,4 ms</td><td class="r num">81,4 ms</td><td class="r num">1,05× wolniej</td><td class="r num">0,0 ms</td></tr><tr><td class="">T3</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--sync)></span>sync</td><td class="r num">7</td><td class="r num">6,1 ms</td><td class="r num">4,1 ms</td><td class="r num">6,9 ms</td><td class="r num">6,9 ms</td><td class="r num">punkt odniesienia</td><td class="r num">0,0 ms</td></tr><tr><td class="">T3</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--worker)></span>worker</td><td class="r num">7</td><td class="r num">4,5 ms</td><td class="r num">3,6 ms</td><td class="r num">6,6 ms</td><td class="r num">6,6 ms</td><td class="r num">1,35× szybciej</td><td class="r num">0,0 ms</td></tr><tr><td class="">T3</td><td class="">ciepły cache</td><td class=""><span class=key style=background:var(--io_uring)></span>io_uring</td><td class="r num">7</td><td class="r num">5,7 ms</td><td class="r num">4,9 ms</td><td class="r num">6,5 ms</td><td class="r num">6,5 ms</td><td class="r num">1,06× szybciej</td><td class="r num">0,0 ms</td></tr></tbody></table></div><h2>Środowisko</h2><dl><dt>PostgreSQL</dt><dd>PostgreSQL 18.6</dd><dt>OS</dt><dd>Rocky Linux release 9.8, kernel 5.14.0-687.57.1.el9_8.x86_64</dd><dt>CPU</dt><dd>AMD Ryzen 9 8940HX with Radeon Graphics · 4 vCPU</dd><dt>RAM</dt><dd>3,6 GB · shared_buffers 1 GB</dd><dt>Dysk</dt><dd>? · VirtualBox ? · cache I/O hosta wyłączony</dd><dt>I/O</dt><dd>effective_io_concurrency 16 · io_workers 3 · io_combine_limit 128 kB</dd><dt>Dane</dt><dd>fakty: 100 mln wierszy, 13 GB + 4,9 GB indeksów</dd></dl><h2>Metoda i powtórzenie testu</h2><p><a href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab/blob/main/docs/METHODOLOGY_PL.md">Metodyka</a> · <a href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab/blob/main/docs/INSTALL_PL.md">Instalacja i uruchomienie</a> · <a href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab/tree/main/results">Surowe dane (CSV, plany)</a> · <a href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab/blob/main/docs/RESULTS_PL.md">Wyniki w Markdown</a></p><footer>© KCB Consulting · Krzysztof Cabaj · <a href="https://github.com/krzysztof-i-cabaj/pg18-io-methods-lab">github.com/krzysztof-i-cabaj/pg18-io-methods-lab</a></footer></div><div id="tip" role="tooltip"></div><script>
+(function(){
+  var root=document.documentElement, KEY='pgio-theme';
+  try{var s=localStorage.getItem(KEY); if(s) root.dataset.theme=s;}catch(e){}
+  var b=document.getElementById('theme');
+  function label(){var d=root.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    b.textContent=d==='dark'?'☀︎':'☾';}
+  label();
+  b.addEventListener('click',function(){
+    var d=root.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    root.dataset.theme=d==='dark'?'light':'dark'; try{localStorage.setItem(KEY,root.dataset.theme);}catch(e){} label();});
+  var tip=document.getElementById('tip');
+  function show(el,x,y){tip.textContent=el.getAttribute('data-tip');tip.style.display='block';
+    var w=tip.offsetWidth,h=tip.offsetHeight;
+    tip.style.left=Math.min(x+14,innerWidth-w-8)+'px';tip.style.top=Math.max(8,y-h-12)+'px';}
+  document.querySelectorAll('[data-tip]').forEach(function(el){
+    var t=el.querySelector('title'); if(t) t.remove();
+    el.addEventListener('pointermove',function(ev){show(el,ev.clientX,ev.clientY);});
+    el.addEventListener('pointerleave',function(){tip.style.display='none';});
+    el.addEventListener('focus',function(){var r=el.getBoundingClientRect();show(el,r.left+r.width/2,r.top);});
+    el.addEventListener('blur',function(){tip.style.display='none';});
+  });
+})();
+</script></body></html>

@@ -1,0 +1,7 @@
+# Pliki uruchamiane na Linuksie (VM) zawsze z LF, takze po klonie na Windows
+# Files executed on Linux (the VM) always use LF, also when cloned on Windows
+*.sh    text eol=lf
+*.sql   text eol=lf
+*.conf  text eol=lf
+*.tmpl  text eol=lf
+*.py    text eol=lf

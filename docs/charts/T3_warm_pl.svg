@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 196" width="760" height="196" role="img" aria-label="T3 · Index Scan, 5000 wierszy — ciepły cache" class="chart"><style>svg{--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--sync:#2a78d6;--worker:#eb6834;--io_uring:#1baf7a}@media (prefers-color-scheme:dark){svg{--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--sync:#3987e5;--worker:#d95926;--io_uring:#199e70}}
+.bg{fill:var(--surface)} .grid{stroke:var(--grid);stroke-width:1}
+.axis{stroke:var(--axis);stroke-width:1} .ref{stroke:var(--ink2);stroke-width:1.5}
+.t1{fill:var(--ink)} .t2{fill:var(--ink2)} .tm{fill:var(--muted)}
+.wh{stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;opacity:.75}
+.m-sync{fill:var(--sync)} .m-worker{fill:var(--worker)} .m-io_uring{fill:var(--io_uring)}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent} .hit:hover+.mk,.hit:focus+.mk{opacity:.8}
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.num{font-variant-numeric:tabular-nums}
+</style><rect class="bg" x="0" y="0" width="760" height="196" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">T3 · Index Scan, 5000 wierszy — ciepły cache</text>
+<line class="grid" x1="92.0" y1="40" x2="92.0" y2="166"/>
+<text class="tm num" x="92.0" y="184" font-size="11" text-anchor="middle">0</text>
+<line class="grid" x1="206.5" y1="40" x2="206.5" y2="166"/>
+<text class="tm num" x="206.5" y="184" font-size="11" text-anchor="middle">2</text>
+<line class="grid" x1="321.0" y1="40" x2="321.0" y2="166"/>
+<text class="tm num" x="321.0" y="184" font-size="11" text-anchor="middle">4</text>
+<line class="grid" x1="435.5" y1="40" x2="435.5" y2="166"/>
+<text class="tm num" x="435.5" y="184" font-size="11" text-anchor="middle">6</text>
+<line class="grid" x1="550.0" y1="40" x2="550.0" y2="166"/>
+<text class="tm num" x="550.0" y="184" font-size="11" text-anchor="middle">8 ms</text>
+<line class="axis" x1="92" y1="40" x2="92" y2="166"/>
+<text class="t2" x="82" y="70.0" font-size="13" text-anchor="end">sync</text>
+<rect class="hit" x="0" y="46" width="760" height="40" tabindex="0" data-tip="sync · mediana 6,1 ms · min–max 4,1 ms–6,9 ms · n=7 · punkt odniesienia"><title>sync · mediana 6,1 ms · min–max 4,1 ms–6,9 ms · n=7 · punkt odniesienia</title></rect>
+<g class="mk" pointer-events="none"><path class="m-sync" d="M92.0,55.0H437.2Q441.2,55.0 441.2,59.0V73.0Q441.2,77.0 437.2,77.0H92.0Z"/>
+<line class="wh" x1="324.8" y1="66.0" x2="486.5" y2="66.0"/><line class="wh" x1="324.8" y1="61.0" x2="324.8" y2="71.0"/><line class="wh" x1="486.5" y1="61.0" x2="486.5" y2="71.0"/></g>
+<text class="t1 num" x="496.5" y="70.0" font-size="13" font-weight="600">6,1 ms<tspan class="t2" font-weight="400"> · punkt odniesienia</tspan></text>
+<text class="t2" x="82" y="110.0" font-size="13" text-anchor="end">worker</text>
+<rect class="hit" x="0" y="86" width="760" height="40" tabindex="0" data-tip="worker · mediana 4,5 ms · min–max 3,6 ms–6,6 ms · n=7 · 1,35× szybciej"><title>worker · mediana 4,5 ms · min–max 3,6 ms–6,6 ms · n=7 · 1,35× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-worker" d="M92.0,95.0H347.2Q351.2,95.0 351.2,99.0V113.0Q351.2,117.0 347.2,117.0H92.0Z"/>
+<line class="wh" x1="299.6" y1="106.0" x2="467.2" y2="106.0"/><line class="wh" x1="299.6" y1="101.0" x2="299.6" y2="111.0"/><line class="wh" x1="467.2" y1="101.0" x2="467.2" y2="111.0"/></g>
+<text class="t1 num" x="477.2" y="110.0" font-size="13" font-weight="600">4,5 ms<tspan class="t2" font-weight="400"> · 1,35× szybciej</tspan></text>
+<text class="t2" x="82" y="150.0" font-size="13" text-anchor="end">io_uring</text>
+<rect class="hit" x="0" y="126" width="760" height="40" tabindex="0" data-tip="io_uring · mediana 5,7 ms · min–max 4,9 ms–6,5 ms · n=7 · 1,06× szybciej"><title>io_uring · mediana 5,7 ms · min–max 4,9 ms–6,5 ms · n=7 · 1,06× szybciej</title></rect>
+<g class="mk" pointer-events="none"><path class="m-io_uring" d="M92.0,135.0H416.7Q420.7,135.0 420.7,139.0V153.0Q420.7,157.0 416.7,157.0H92.0Z"/>
+<line class="wh" x1="372.5" y1="146.0" x2="461.9" y2="146.0"/><line class="wh" x1="372.5" y1="141.0" x2="372.5" y2="151.0"/><line class="wh" x1="461.9" y1="141.0" x2="461.9" y2="151.0"/></g>
+<text class="t1 num" x="471.9" y="150.0" font-size="13" font-weight="600">5,7 ms<tspan class="t2" font-weight="400"> · 1,06× szybciej</tspan></text>
+</svg>

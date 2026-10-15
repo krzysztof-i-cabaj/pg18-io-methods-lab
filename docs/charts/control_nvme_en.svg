@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 284" width="760" height="284" role="img" aria-label="median time relative to sync, per disk controller (lower = faster)" class="chart"><style>svg{--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--sync:#2a78d6;--worker:#eb6834;--io_uring:#1baf7a}@media (prefers-color-scheme:dark){svg{--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--sync:#3987e5;--worker:#d95926;--io_uring:#199e70}}
+.bg{fill:var(--surface)} .grid{stroke:var(--grid);stroke-width:1}
+.axis{stroke:var(--axis);stroke-width:1} .ref{stroke:var(--ink2);stroke-width:1.5}
+.t1{fill:var(--ink)} .t2{fill:var(--ink2)} .tm{fill:var(--muted)}
+.wh{stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;opacity:.75}
+.m-sync{fill:var(--sync)} .m-worker{fill:var(--worker)} .m-io_uring{fill:var(--io_uring)}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent} .hit:hover+.mk,.hit:focus+.mk{opacity:.8}
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.num{font-variant-numeric:tabular-nums}
+</style><rect class="bg" x="0" y="0" width="760" height="284" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">median time relative to sync, per disk controller (lower = faster)</text>
+<line class="ref" x1="16" y1="44" x2="34" y2="44"/><text class="t2" x="40" y="48" font-size="12">sync</text>
+<circle class="m-worker dot" cx="98" cy="44" r="6"/><text class="t2" x="110" y="48" font-size="12">worker</text>
+<circle class="m-io_uring dot" cx="198" cy="44" r="6"/><text class="t2" x="210" y="48" font-size="12">io_uring</text>
+<line class="grid" x1="260.0" y1="64" x2="260.0" y2="244"/>
+<text class="tm num" x="260.0" y="262" font-size="11" text-anchor="middle">0.0</text>
+<line class="grid" x1="343.6" y1="64" x2="343.6" y2="244"/>
+<text class="tm num" x="343.6" y="262" font-size="11" text-anchor="middle">0.5</text>
+<line class="grid" x1="427.3" y1="64" x2="427.3" y2="244"/>
+<text class="tm num" x="427.3" y="262" font-size="11" text-anchor="middle">1.0</text>
+<line class="grid" x1="510.9" y1="64" x2="510.9" y2="244"/>
+<text class="tm num" x="510.9" y="262" font-size="11" text-anchor="middle">1.5</text>
+<line class="grid" x1="594.5" y1="64" x2="594.5" y2="244"/>
+<text class="tm num" x="594.5" y="262" font-size="11" text-anchor="middle">2.0</text>
+<line class="grid" x1="678.2" y1="64" x2="678.2" y2="244"/>
+<text class="tm num" x="678.2" y="262" font-size="11" text-anchor="middle">2.5</text>
+<line class="ref" x1="427.3" y1="60" x2="427.3" y2="244"/>
+<text class="t2" x="246" y="83.0" font-size="12.5" text-anchor="end">T1b · Parallel Seq Scan · SATA</text>
+<circle class="hit" cx="491.4" cy="79.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workers · SATA · worker: 57.8 s · 1.38× slower"><title>T1b · Parallel Seq Scan, 2 workers · SATA · worker: 57.8 s · 1.38× slower</title></circle><circle class="mk m-worker dot" cx="491.4" cy="79.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="398.1" cy="79.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workers · SATA · io_uring: 34.5 s · 1.21× faster"><title>T1b · Parallel Seq Scan, 2 workers · SATA · io_uring: 34.5 s · 1.21× faster</title></circle><circle class="mk m-io_uring dot" cx="398.1" cy="79.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="113.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="484.6" cy="109.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workers · NVMe · worker: 58.4 s · 1.34× slower"><title>T1b · Parallel Seq Scan, 2 workers · NVMe · worker: 58.4 s · 1.34× slower</title></circle><circle class="mk m-worker dot" cx="484.6" cy="109.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="513.5" cy="109.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workers · NVMe · io_uring: 66.0 s · 1.52× slower"><title>T1b · Parallel Seq Scan, 2 workers · NVMe · io_uring: 66.0 s · 1.52× slower</title></circle><circle class="mk m-io_uring dot" cx="513.5" cy="109.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="143.0" font-size="12.5" text-anchor="end">T2 · Bitmap Heap Scan · SATA</text>
+<line class="grid" x1="16" y1="124" x2="744" y2="124"/>
+<circle class="hit" cx="603.3" cy="139.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 day (~54k rows) · SATA · worker: 22.5 s · 2.05× slower"><title>T2 · Bitmap Heap Scan, 1 day (~54k rows) · SATA · worker: 22.5 s · 2.05× slower</title></circle><circle class="mk m-worker dot" cx="603.3" cy="139.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="515.6" cy="139.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 day (~54k rows) · SATA · io_uring: 16.8 s · 1.53× slower"><title>T2 · Bitmap Heap Scan, 1 day (~54k rows) · SATA · io_uring: 16.8 s · 1.53× slower</title></circle><circle class="mk m-io_uring dot" cx="515.6" cy="139.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="173.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="692.1" cy="169.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 day (~54k rows) · NVMe · worker: 15.3 s · 2.58× slower"><title>T2 · Bitmap Heap Scan, 1 day (~54k rows) · NVMe · worker: 15.3 s · 2.58× slower</title></circle><circle class="mk m-worker dot" cx="692.1" cy="169.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="590.4" cy="169.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 day (~54k rows) · NVMe · io_uring: 11.7 s · 1.98× slower"><title>T2 · Bitmap Heap Scan, 1 day (~54k rows) · NVMe · io_uring: 11.7 s · 1.98× slower</title></circle><circle class="mk m-io_uring dot" cx="590.4" cy="169.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="203.0" font-size="12.5" text-anchor="end">T4 · VACUUM · SATA</text>
+<line class="grid" x1="16" y1="184" x2="744" y2="184"/>
+<circle class="hit" cx="496.1" cy="199.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10M rows, 10% deleted · SATA · worker: 21.4 s · 1.41× slower"><title>T4 · VACUUM, 10M rows, 10% deleted · SATA · worker: 21.4 s · 1.41× slower</title></circle><circle class="mk m-worker dot" cx="496.1" cy="199.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="460.7" cy="199.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10M rows, 10% deleted · SATA · io_uring: 18.2 s · 1.20× slower"><title>T4 · VACUUM, 10M rows, 10% deleted · SATA · io_uring: 18.2 s · 1.20× slower</title></circle><circle class="mk m-io_uring dot" cx="460.7" cy="199.0" r="6" pointer-events="none"/>
+<text class="tm" x="246" y="233.0" font-size="12.5" text-anchor="end">NVMe</text>
+<circle class="hit" cx="518.0" cy="229.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10M rows, 10% deleted · NVMe · worker: 16.7 s · 1.54× slower"><title>T4 · VACUUM, 10M rows, 10% deleted · NVMe · worker: 16.7 s · 1.54× slower</title></circle><circle class="mk m-worker dot" cx="518.0" cy="229.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="479.4" cy="229.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10M rows, 10% deleted · NVMe · io_uring: 14.2 s · 1.31× slower"><title>T4 · VACUUM, 10M rows, 10% deleted · NVMe · io_uring: 14.2 s · 1.31× slower</title></circle><circle class="mk m-io_uring dot" cx="479.4" cy="229.0" r="6" pointer-events="none"/>
+</svg>

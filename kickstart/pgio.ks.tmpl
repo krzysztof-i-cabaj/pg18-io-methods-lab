@@ -1,0 +1,90 @@
+# ==============================================================================
+# Tytul:        pgio.ks.tmpl
+# Opis:         Kickstart VM pgio (Rocky 9.8 minimal): system tylko na sda, sdb
+#               zostaje pusty (dysk danych formatuje guest/provision.sh). Bez hasel:
+#               root zablokowany, dostep wylacznie kluczem SSH hosta.
+#               Placeholdery: {{IP}} {{HOSTNAME}} {{SSH_PUBKEY}}
+# Description [EN]: Kickstart for VM pgio (Rocky 9.8 minimal): OS on sda only, sdb
+#               left empty (data disk is formatted by guest/provision.sh). No
+#               passwords: root locked, access by the host SSH key only.
+#
+# Autor:        KCB Kris
+# Data:         2026-10-15
+# Wersja:       1.0
+# Konwencje:    <repo>/SETTINGS.md
+#
+# Wymagania [PL]:    - Rocky Linux 9.8 minimal ISO, serwer KS na hoscie (lab.ps1 build)
+# Requirements [EN]: - Rocky Linux 9.8 minimal ISO, KS server on the host (lab.ps1 build)
+#
+# Uzycie [PL]:       Renderowany przez lab.ps1 do kickstart/pgio.ks
+# Usage [EN]:        Rendered by lab.ps1 into kickstart/pgio.ks
+# ==============================================================================
+
+text
+lang en_US.UTF-8
+keyboard us
+timezone Europe/Warsaw --utc
+rootpw --lock
+selinux --enforcing
+firewall --enabled --service=ssh
+services --enabled=sshd,chronyd,NetworkManager
+
+# enp0s3 = host-only: BEZ bramy domyslnej (--nodefroute), inaczej slepa brama
+# 192.168.56.1 wygrywa z NAT i po reboocie znika DNS/internet.
+# enp0s3 = host-only: NO default route, or the dead-end gateway beats NAT.
+network --bootproto=static --device=enp0s3 --ip={{IP}} --netmask=255.255.255.0 --hostname={{HOSTNAME}} --nodefroute --nameserver=1.1.1.1,9.9.9.9 --activate
+# enp0s8 = NAT: jedyna trasa domyslna (repo Rocky + PGDG) / the only default route
+network --bootproto=dhcp --device=enp0s8 --activate
+
+url --url=https://download.rockylinux.org/pub/rocky/9/BaseOS/x86_64/os/
+repo --name=appstream --baseurl=https://download.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/
+
+# Dysk systemowy wybiera %pre (najmniejszy dysk), NIE nazwa "sda": nazwy sdX nie sa stabilne —
+# 1. build 2026-10-15 zainstalowal system na dysku danych (byl "sda" w instalatorze).
+# OS disk is chosen in %pre (smallest disk), NOT by name: sdX names are not stable.
+%include /tmp/pgio-disk.ks
+zerombr
+autopart --type=lvm --noswap
+
+%pre --interpreter=/bin/bash --log=/tmp/pgio-pre.log
+set -eu
+lsblk -dnbo NAME,SIZE,TYPE
+# tylko prawdziwe dyski (instalator ma tez zram0 typu "disk") / real disks only (installer has zram0)
+os=$(lsblk -dnbo NAME,SIZE,TYPE | awk '$3=="disk" && $1 ~ /^(sd|vd|nvme)/ {print $2, $1}' | sort -n | head -1 | cut -d' ' -f2)
+[ -n "$os" ] || { echo "nie znaleziono dysku / no disk found"; exit 1; }
+echo "dysk systemowy / OS disk: $os"
+cat > /tmp/pgio-disk.ks <<EOF
+ignoredisk --only-use=$os
+clearpart --all --initlabel --drives=$os
+bootloader --location=mbr --boot-drive=$os
+EOF
+%end
+
+%packages
+@core
+openssh-server
+chrony
+vim-minimal
+tar
+NetworkManager
+firewalld
+%end
+
+%post --interpreter=/bin/bash --log=/var/log/pgio-ks-post.log
+set -euo pipefail
+mkdir -p /root/.ssh
+echo '{{SSH_PUBKEY}}' > /root/.ssh/authorized_keys
+chmod 700 /root/.ssh
+chmod 600 /root/.ssh/authorized_keys
+restorecon -R /root/.ssh || true
+
+# io_uring: RHEL/Rocky 9 domyslnie kernel.io_uring_disabled = 2 (calkowicie wylaczony) —
+# test porownuje io_method=io_uring, wiec odblokowujemy go swiadomie.
+# io_uring: RHEL/Rocky 9 default is kernel.io_uring_disabled = 2 (fully disabled) — enabled on purpose.
+cat > /etc/sysctl.d/90-pgio-io_uring.conf <<'EOF'
+# pg18-io-methods-lab: io_uring enabled on purpose (RHEL 9 default = 2, disabled)
+kernel.io_uring_disabled = 0
+EOF
+%end
+
+reboot --eject

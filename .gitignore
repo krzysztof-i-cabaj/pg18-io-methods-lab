@@ -1,0 +1,22 @@
+# Wyrenderowany kickstart (klucz publiczny, nazwa hosta) — w repo tylko szablon
+kickstart/pgio.ks
+
+# Logi i kopie zapasowe / logs and backups
+logs/
+*.log
+*.bak*
+# Logi pomiarow to surowe dane wynikow - publikujemy / benchmark logs are raw results - keep them
+!results/**/*.log
+
+# Python / system
+__pycache__/
+*.pyc
+Thumbs.db
+.vscode/
+
+# Robocze pliki projektu (tylko lokalnie) / local working files
+PLAN.md
+HANDOFF.md
+EXECUTION_LOG.md
+SETTINGS.md
+_public/

@@ -1,0 +1,54 @@
+
+## OS / kernel
+Rocky Linux release 9.8 (Blue Onyx)
+5.14.0-687.57.1.el9_8.x86_64
+
+## CPU
+CPU(s):                                  4
+Model name:                              AMD Ryzen 9 8940HX with Radeon Graphics
+Thread(s) per core:                      1
+Core(s) per socket:                      4
+Socket(s):                               1
+Hypervisor vendor:                       KVM
+
+## RAM
+               total        used        free      shared  buff/cache   available
+Mem:            3655         463        2300          58        1161        3191
+Swap:              0           0           0
+
+## Dyski / disks
+NAME               SIZE ROTA TYPE FSTYPE      MOUNTPOINT
+sda                 20G    0 disk             
+├─sda1               1G    0 part xfs         /boot
+└─sda2              19G    0 part LVM2_member 
+  └─rlm_pgio-root   19G    0 lvm  xfs         /
+sdb                 40G    0 disk xfs         /pgdata
+sr0               1024M    0 rom              
+
+## Dysk danych / data disk
+TARGET  SOURCE   FSTYPE OPTIONS
+/pgdata /dev/sdb xfs    rw,noatime,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota
+scheduler: none [mq-deadline] kyber bfq 
+rotational: 0
+nr_requests: 64
+read_ahead_kb: 128
+
+## io_uring (kernel)
+kernel.io_uring_disabled = 0
+liburing-2.12-1.el9.x86_64
+
+## PostgreSQL
+PostgreSQL 18.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-14), 64-bit
+pg_config --configure zawiera liburing: TAK
+effective_io_concurrency = 16
+io_combine_limit = 16 8kB
+io_max_combine_limit = 16 8kB
+io_method = worker
+io_workers = 3
+maintenance_io_concurrency = 16
+max_parallel_workers_per_gather = 2
+shared_buffers = 131072 8kB
+track_io_timing = on
+
+## Dozwolone wartosci io_method / allowed values
+{sync,worker,io_uring}

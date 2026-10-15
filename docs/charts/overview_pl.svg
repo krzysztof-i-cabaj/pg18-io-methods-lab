@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 274" width="760" height="274" role="img" aria-label="zimny cache: mediana czasu względem sync (mniej = szybciej)" class="chart"><style>svg{--surface:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#898781;--grid:#e1e0d9;--axis:#c3c2b7;--sync:#2a78d6;--worker:#eb6834;--io_uring:#1baf7a}@media (prefers-color-scheme:dark){svg{--surface:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#898781;--grid:#2c2c2a;--axis:#383835;--sync:#3987e5;--worker:#d95926;--io_uring:#199e70}}
+.bg{fill:var(--surface)} .grid{stroke:var(--grid);stroke-width:1}
+.axis{stroke:var(--axis);stroke-width:1} .ref{stroke:var(--ink2);stroke-width:1.5}
+.t1{fill:var(--ink)} .t2{fill:var(--ink2)} .tm{fill:var(--muted)}
+.wh{stroke:var(--ink);stroke-width:1.5;stroke-linecap:round;opacity:.75}
+.m-sync{fill:var(--sync)} .m-worker{fill:var(--worker)} .m-io_uring{fill:var(--io_uring)}
+.dot{stroke:var(--surface);stroke-width:2}
+.hit{fill:transparent} .hit:hover+.mk,.hit:focus+.mk{opacity:.8}
+text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.num{font-variant-numeric:tabular-nums}
+</style><rect class="bg" x="0" y="0" width="760" height="274" rx="8"/>
+<text class="t1" x="16" y="26" font-size="15" font-weight="600">zimny cache: mediana czasu względem sync (mniej = szybciej)</text>
+<line class="ref" x1="16" y1="44" x2="34" y2="44"/><text class="t2" x="40" y="48" font-size="12">sync</text>
+<circle class="m-worker dot" cx="98" cy="44" r="6"/><text class="t2" x="110" y="48" font-size="12">worker</text>
+<circle class="m-io_uring dot" cx="198" cy="44" r="6"/><text class="t2" x="210" y="48" font-size="12">io_uring</text>
+<line class="grid" x1="260.0" y1="64" x2="260.0" y2="234"/>
+<text class="tm num" x="260.0" y="252" font-size="11" text-anchor="middle">0,0</text>
+<line class="grid" x1="362.2" y1="64" x2="362.2" y2="234"/>
+<text class="tm num" x="362.2" y="252" font-size="11" text-anchor="middle">0,5</text>
+<line class="grid" x1="464.4" y1="64" x2="464.4" y2="234"/>
+<text class="tm num" x="464.4" y="252" font-size="11" text-anchor="middle">1,0</text>
+<line class="grid" x1="566.7" y1="64" x2="566.7" y2="234"/>
+<text class="tm num" x="566.7" y="252" font-size="11" text-anchor="middle">1,5</text>
+<line class="grid" x1="668.9" y1="64" x2="668.9" y2="234"/>
+<text class="tm num" x="668.9" y="252" font-size="11" text-anchor="middle">2,0</text>
+<line class="ref" x1="464.4" y1="60" x2="464.4" y2="234"/>
+<text class="t2" x="246" y="85.0" font-size="12.5" text-anchor="end">T1a · Seq Scan</text>
+<circle class="hit" cx="462.0" cy="81.0" r="13" tabindex="0" data-tip="T1a · Seq Scan, 1 proces · zimny cache · worker: 58,4 s · ≈ sync"><title>T1a · Seq Scan, 1 proces · zimny cache · worker: 58,4 s · ≈ sync</title></circle><circle class="mk m-worker dot" cx="462.0" cy="81.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="447.6" cy="81.0" r="13" tabindex="0" data-tip="T1a · Seq Scan, 1 proces · zimny cache · io_uring: 54,2 s · 1,09× szybciej"><title>T1a · Seq Scan, 1 proces · zimny cache · io_uring: 54,2 s · 1,09× szybciej</title></circle><circle class="mk m-io_uring dot" cx="447.6" cy="81.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="119.0" font-size="12.5" text-anchor="end">T1b · Parallel Seq Scan</text>
+<line class="grid" x1="16" y1="98" x2="744" y2="98" opacity=".6"/>
+<circle class="hit" cx="542.8" cy="115.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · zimny cache · worker: 57,8 s · 1,38× wolniej"><title>T1b · Parallel Seq Scan, 2 workery · zimny cache · worker: 57,8 s · 1,38× wolniej</title></circle><circle class="mk m-worker dot" cx="542.8" cy="115.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="428.7" cy="115.0" r="13" tabindex="0" data-tip="T1b · Parallel Seq Scan, 2 workery · zimny cache · io_uring: 34,5 s · 1,21× szybciej"><title>T1b · Parallel Seq Scan, 2 workery · zimny cache · io_uring: 34,5 s · 1,21× szybciej</title></circle><circle class="mk m-io_uring dot" cx="428.7" cy="115.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="153.0" font-size="12.5" text-anchor="end">T2 · Bitmap Heap Scan</text>
+<line class="grid" x1="16" y1="132" x2="744" y2="132" opacity=".6"/>
+<circle class="hit" cx="679.6" cy="149.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · worker: 22,5 s · 2,05× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · worker: 22,5 s · 2,05× wolniej</title></circle><circle class="mk m-worker dot" cx="679.6" cy="149.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="572.4" cy="149.0" r="13" tabindex="0" data-tip="T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · io_uring: 16,8 s · 1,53× wolniej"><title>T2 · Bitmap Heap Scan, 1 dzień (~54 tys. wierszy) · zimny cache · io_uring: 16,8 s · 1,53× wolniej</title></circle><circle class="mk m-io_uring dot" cx="572.4" cy="149.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="187.0" font-size="12.5" text-anchor="end">T3 · Index Scan</text>
+<line class="grid" x1="16" y1="166" x2="744" y2="166" opacity=".6"/>
+<circle class="hit" cx="474.7" cy="183.0" r="13" tabindex="0" data-tip="T3 · Index Scan, 5000 wierszy · zimny cache · worker: 3,51 s · 1,05× wolniej"><title>T3 · Index Scan, 5000 wierszy · zimny cache · worker: 3,51 s · 1,05× wolniej</title></circle><circle class="mk m-worker dot" cx="474.7" cy="183.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="464.9" cy="183.0" r="13" tabindex="0" data-tip="T3 · Index Scan, 5000 wierszy · zimny cache · io_uring: 3,35 s · ≈ sync"><title>T3 · Index Scan, 5000 wierszy · zimny cache · io_uring: 3,35 s · ≈ sync</title></circle><circle class="mk m-io_uring dot" cx="464.9" cy="183.0" r="6" pointer-events="none"/>
+<text class="t2" x="246" y="221.0" font-size="12.5" text-anchor="end">T4 · VACUUM</text>
+<line class="grid" x1="16" y1="200" x2="744" y2="200" opacity=".6"/>
+<circle class="hit" cx="548.6" cy="217.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · worker: 21,4 s · 1,41× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · worker: 21,4 s · 1,41× wolniej</title></circle><circle class="mk m-worker dot" cx="548.6" cy="217.0" r="6" pointer-events="none"/>
+<circle class="hit" cx="505.3" cy="217.0" r="13" tabindex="0" data-tip="T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · io_uring: 18,2 s · 1,20× wolniej"><title>T4 · VACUUM, 10 mln wierszy, 10% usuniętych · zimny cache · io_uring: 18,2 s · 1,20× wolniej</title></circle><circle class="mk m-io_uring dot" cx="505.3" cy="217.0" r="6" pointer-events="none"/>
+</svg>
