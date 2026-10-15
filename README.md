@@ -81,6 +81,26 @@ Cold = PostgreSQL stopped, OS page cache dropped, PostgreSQL started before **ev
 Windows 11 + PowerShell 7 (scripted path) or any VirtualBox host (manual path) · VirtualBox 7.x · Python 3.8+ ·
 OpenSSH key pair · `Rocky-9.8-x86_64-minimal.iso` · ~80 GB free disk · host-only network `192.168.56.0/24`.
 
+## 🏗️ How the VM is built — Kickstart over HTTP
+
+No clicking through the installer. One command, `.\lab.ps1 build`, takes an empty host to a running Rocky Linux VM in ~10–20 minutes:
+
+```text
+lab.ps1 build
+  ├─ starts a small HTTP server on the host (192.168.56.1:8000) serving kickstart/ only
+  ├─ VBoxManage: creates the VM, disks, NICs, attaches the ISO, boots it
+  ├─ VBoxManage keyboardputscancode: types at the boot menu
+  │     inst.ks=http://192.168.56.1:8000/kickstart/pgio.ks  ip=192.168.56.40:…
+  ├─ the installer downloads the kickstart and installs unattended
+  │     (disk layout, network, packages, SSH key, kernel settings in %post)
+  └─ the host waits for SSH, detaches the ISO, stops the HTTP server
+```
+
+The kickstart is a template (`kickstart/pgio.ks.tmpl`): IP, hostname and SSH key are filled in per machine, so the same
+flow builds a lab of **4–5 or more VMs** with no extra manual work — each one identical, rebuilt from scratch in minutes
+whenever a test needs a clean start. Manual equivalent (typing `inst.ks=` yourself, or the interactive installer):
+[INSTALL §3](docs/INSTALL.md).
+
 ## 🚀 Run
 
 Every stage has two paths: 🤖 **scripted (automatic / semi-automatic)** and ✋ **manual** (plain `VBoxManage`, installer, `dnf`, `psql`).

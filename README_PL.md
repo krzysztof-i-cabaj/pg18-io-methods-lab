@@ -81,6 +81,26 @@ Zimny cache = zatrzymanie PostgreSQL, wyczyszczenie cache stron systemu i start 
 Windows 11 + PowerShell 7 (ścieżka skryptowa) albo dowolny host z VirtualBox (ścieżka ręczna) · VirtualBox 7.x · Python 3.8+ ·
 para kluczy OpenSSH · `Rocky-9.8-x86_64-minimal.iso` · ~80 GB wolnego miejsca · sieć host-only `192.168.56.0/24`.
 
+## 🏗️ Jak powstaje VM — Kickstart po HTTP
+
+Bez klikania w instalatorze. Jedno polecenie, `.\lab.ps1 build`, prowadzi od pustego hosta do działającej VM z Rocky Linux w ~10–20 minut:
+
+```text
+lab.ps1 build
+  ├─ uruchamia mały serwer HTTP na hoście (192.168.56.1:8000), udostępnia tylko kickstart/
+  ├─ VBoxManage: tworzy VM, dyski, karty sieciowe, podpina ISO, startuje
+  ├─ VBoxManage keyboardputscancode: wpisuje w menu startowym
+  │     inst.ks=http://192.168.56.1:8000/kickstart/pgio.ks  ip=192.168.56.40:…
+  ├─ instalator pobiera kickstart i instaluje system bez obsługi
+  │     (układ dysków, sieć, pakiety, klucz SSH, ustawienia jądra w %post)
+  └─ host czeka na SSH, odłącza ISO, zatrzymuje serwer HTTP
+```
+
+Kickstart jest szablonem (`kickstart/pgio.ks.tmpl`): IP, nazwa hosta i klucz SSH są wstawiane dla każdej maszyny, więc ten sam
+przepływ buduje lab z **4–5 i więcej VM** bez dodatkowej pracy ręcznej — każda identyczna, odbudowywana od zera w kilka minut,
+gdy test potrzebuje czystego startu. Odpowiednik ręczny (samodzielne wpisanie `inst.ks=` albo instalator interaktywny):
+[INSTALL_PL §3](docs/INSTALL_PL.md).
+
 ## 🚀 Uruchomienie
 
 Każdy etap ma dwie ścieżki: 🤖 **skryptową (automatycznie / półautomatycznie)** i ✋ **ręczną** (zwykłe `VBoxManage`, instalator, `dnf`, `psql`).
