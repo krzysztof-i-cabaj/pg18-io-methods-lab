@@ -1,0 +1,82 @@
+# Karta srodowiska / environment card — 2026-11-23 18:21
+## Host
+VirtualBox: 7.2.22r175245
+Dzialajace VM: "pgio" {d23901a4-2265-41a4-bf32-acd49fd8a23b}
+Kontrolery i dyski VM: storagecontrollername0="SATA"; storagecontrollertype0="IntelAhci"; storagecontrollername1="NVMe"; storagecontrollertype1="NVMe"; "SATA-0-0"="D:\\VM\\pgio\\pgio.vdi"; "SATA-1-0"="emptydrive"; "SATA-2-0"="none"; "NVMe-0-0"="D:\\VM\\pgio\\pgio-data.vdi"
+## System
+data VM: 2026-11-23 18:21:06
+pgio.lab.test
+Rocky Linux release 9.8 (Blue Onyx)
+5.14.0-687.57.1.el9_8.x86_64
+CPU: 4  RAM: 3655 MB
+
+## Dysk danych / data disk
+/pgdata: /dev/nvme0n1
+/dev/nvme0n1     40G   24G   17G  58% /pgdata
+urzadzenie / device: nvme0n1  (nvme* = kontroler NVMe, sd* = SATA)
+scheduler: none [mq-deadline] kyber bfq   rotational: 0  nr_requests: 256
+23G	/pgdata/18
+43M	/pgdata/19
+
+## Pakiety i uslugi / packages and services
+pgdg-redhat-repo-42.0-71.rhel9PGDG.noarch
+postgresql18-server-18.6-1PGDG.rhel9.8.x86_64
+postgresql19-server-19.0-1PGDG.rhel9.8.x86_64
+postgresql19-contrib-19.0-1PGDG.rhel9.8.x86_64
+postgresql-18: active / boot: enabled
+postgresql-19: active / boot: disabled
+State  Recv-Q Send-Q Local Address:Port Peer Address:Port
+LISTEN 0      200        127.0.0.1:5433      0.0.0.0:*   
+LISTEN 0      200          0.0.0.0:5432      0.0.0.0:*   
+LISTEN 0      200             [::]:5432         [::]:*   
+LISTEN 0      200            [::1]:5433         [::]:*   
+OK   /usr/pgsql-18/bin/pgbench
+OK   /usr/pgsql-19/bin/pgbench
+OK   /usr/pgsql-19/bin/pg_upgrade
+OK   python3 Python 3.9.25
+
+## Ustawienia klastrow / cluster settings
+### PG18 (port 5432)
+data_checksums = on
+data_directory = /pgdata/18/data
+default_toast_compression = pglz
+effective_io_concurrency = 16
+io_method = worker
+io_workers = 3
+jit = on
+log_lock_waits = off
+max_locks_per_transaction = 64
+max_replication_slots = 10
+max_wal_senders = 10
+port = 5432
+server_version = 18.6
+shared_buffers = 131072 8kB
+track_io_timing = on
+wal_level = replica
+baza labtest: brak
+### PG19 (port 5433)
+autovacuum_max_parallel_workers = 0
+data_checksums = on
+data_directory = /pgdata/19/data
+default_toast_compression = lz4
+effective_io_concurrency = 16
+effective_wal_level = replica
+io_max_workers = 8
+io_method = worker
+io_min_workers = 2
+jit = off
+log_lock_waits = on
+max_locks_per_transaction = 128
+max_repack_replication_slots = 5
+max_replication_slots = 10
+max_wal_senders = 10
+port = 5433
+server_version = 19.0
+shared_buffers = 131072 8kB
+track_io_timing = on
+wal_level = replica
+baza labtest: brak
+
+## Inne obciazenie / other load
+ 18:21:07 up 5 min,  0 users,  load average: 0.16, 0.08, 0.02
+PREFLIGHT OK

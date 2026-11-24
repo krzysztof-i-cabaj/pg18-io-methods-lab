@@ -1,0 +1,4 @@
+ts,run,pg,variant,rows,maint_ms,tbl_before_mb,idx_before_mb,tbl_after_mb,idx_after_mb,base_tps,maint_tps,zero_tps_s,max_lat_ms,rows_after,ok
+2026-11-23_18:29:29,1,18,vacuum_full,400000,292,48.1,11.3,24.4,5.6,11606,32485,0,242,200000,1
+2026-11-23_18:29:43,1,19,vacuum_full,400000,269,48.1,11.3,24.5,5.6,11913,0,0,231,200000,1
+2026-11-23_18:29:58,1,19,repack_concurrently,400000,569,48.1,11.3,24.5,5.6,9787,0,0,8,200000,1

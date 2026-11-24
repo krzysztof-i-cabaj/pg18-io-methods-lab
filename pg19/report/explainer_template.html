@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REPACK kontra VACUUM FULL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: lab report for DBAs, exact and calm
+   IDEA a PostgreSQL lab sheet: one measured trace of writes per second, the lock drawn on it
+   PICTURE the writes-per-second chart, VACUUM FULL vs REPACK (CONCURRENTLY), switchable 1/4/8 sessions
+   COLOUR PostgreSQL blue band, white sheet, series blue (REPACK) and orange (VACUUM FULL), grey hatch for blocked time
+   TYPE Inter Tight 700 for titles, Inter for text, JetBrains Mono for SQL
+   LAYOUT laptop: finding + figures across the blue band, chart full width under it; phone: stacked, chart inside first screen */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#10161f);--band:light-dark(#336791,#1b3a5c);--bandink:#ffffff;--ink:light-dark(#0f1720,#e8edf3);--ink2:light-dark(#46525f,#b5c0cc);--muted:light-dark(#77818c,#8b96a3);--rule:light-dark(#e3e7ec,#26313e);--panel:light-dark(#f4f7fa,#162030);--rc:light-dark(#2a78d6,#3987e5);--vf:light-dark(#eb6834,#d95926);--lock:light-dark(#5b6572,#9aa6b4)}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,"Segoe UI",sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Inter Tight",Inter,system-ui,sans-serif;letter-spacing:-.02em;line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(28px,4.2vw,46px);font-weight:700}
+h2{font-size:clamp(22px,2.8vw,30px);font-weight:700;margin-bottom:12px}
+h3{font-size:18px;font-weight:600;margin-bottom:6px}
+p{margin:0 0 12px;max-width:68ch}
+code{font:500 14px/1.4 "JetBrains Mono",ui-monospace,monospace;overflow-wrap:anywhere}
+.band{padding-block:clamp(28px,4vw,56px);padding-inline:max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.top{background:var(--band);color:var(--bandink)}
+.top p{color:#dce8f5}
+.lead{font-size:18px;max-width:62ch;margin-top:14px}
+.figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11em,1fr));gap:12px;margin-top:22px}
+.fg{border-top:1px solid rgba(255,255,255,.35);padding-top:10px}
+.fg b{display:block;font:700 clamp(26px,3vw,34px)/1.1 "Inter Tight",sans-serif;white-space:nowrap}
+.fg span{font-size:14px;color:#dce8f5}
+.sheet{background:var(--bg);color:var(--ink);border-radius:10px;padding:18px clamp(12px,2vw,24px) 14px;margin-top:26px}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.ctl span{font-size:14px;color:var(--ink2);margin-right:4px}
+.ctl button{font:600 15px Inter,sans-serif;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer}
+.ctl button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.ctl button:focus-visible{outline:3px solid var(--rc);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:14px;color:var(--ink2);margin:4px 0 2px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.legend .hatch{height:12px;width:16px;background:repeating-linear-gradient(135deg,var(--lock) 0 2px,transparent 2px 5px);opacity:.55}
+.fig{position:relative;min-height:360px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+svg text{paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;line-height:1.4;padding:6px 9px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity .12s}
+.cap{font-size:14px;color:var(--ink2);margin-top:6px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:clamp(20px,4vw,48px);align-items:start}
+.diagram svg{width:100%;height:auto;display:block}
+.diagram .sx{overflow-x:auto}
+#phases{min-width:760px}
+#bloat,#log{min-width:470px}
+figure{margin:0}
+figcaption{font-size:14px;color:var(--ink2);margin-top:8px}
+.alt{background:var(--panel)}
+.rows{display:grid;gap:14px;margin-top:8px}
+.row{display:grid;grid-template-columns:7.5em minmax(0,1fr);gap:12px;align-items:center}
+.row>div:first-child{font-weight:600;font-size:15px}
+.bar{position:relative;height:22px;margin:3px 0}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:0 4px 4px 0}
+.bar em{position:absolute;top:1px;font-style:normal;font-size:13px;font-weight:600;white-space:nowrap;padding-left:8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;margin-top:10px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left}
+th{font-weight:600;color:var(--ink2);font-size:14px}
+td{font-variant-numeric:tabular-nums}
+.do{display:grid;grid-template-columns:repeat(auto-fit,minmax(16em,1fr));gap:18px;margin-top:8px}
+.do div{border-top:2px solid var(--ink);padding-top:10px}
+.note{font-size:14px;color:var(--ink2)}
+.toc{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;margin-top:18px}
+.toc a{color:#ffffff}
+a{color:var(--rc)}
+@media(max-width:760px){.grid2{grid-template-columns:minmax(0,1fr)}.fig{min-height:300px}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.row{grid-template-columns:minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.tip{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="band top">
+<div class="wrap">
+<h1>REPACK (CONCURRENTLY) w PostgreSQL 19: przy małym ruchu nie blokuje zapisów, przy dużym blokuje na końcu</h1>
+<p class="lead">Zmierzyliśmy porządkowanie rozdętej tabeli 2,3 GB, podczas gdy 1, 4 albo 8 sesji cały czas do niej pisze. Przy małym ruchu nowe polecenie naprawdę nie zatrzymuje zapisów, a stary <code>VACUUM FULL</code> blokuje je na 11 s. Z ruchem przewaga topnieje, a przy 8 sesjach REPACK blokował dłużej: 18 s wobec 15 s.</p>
+<div class="figs" id="figs"></div>
+<nav class="toc" aria-label="Sekcje"><a href="#problem">Skąd problem</a><a href="#mechanizm">Jak działają oba polecenia</a><a href="#ruch">Dlaczego koniec rośnie z ruchem</a><a href="#wyniki">Wszystkie wyniki</a><a href="#co-robic">Co z tym zrobić</a><a href="#warunki">Jak mierzyliśmy</a><a href="https://krzysztof-i-cabaj.github.io/pg18-io-methods-lab/pg19/" lang="en" hreflang="en">English</a></nav>
+<div class="sheet">
+<div class="ctl" role="group" aria-label="Liczba sesji zapisujących"><span>Sesje zapisujące w trakcie:</span>
+<button id="c1" data-c="1" aria-pressed="false">1 sesja</button><button id="c4" data-c="4" aria-pressed="true">4 sesje</button><button id="c8" data-c="8" aria-pressed="false">8 sesji</button></div>
+<div class="legend"><span><i style="background:var(--vf)"></i>VACUUM FULL</span><span><i style="background:var(--rc)"></i>REPACK (CONCURRENTLY)</span><span><i class="hatch"></i>zapisy stoją (0 na sekundę)</span></div>
+<div class="fig" id="main"><svg id="mainsvg" role="img" aria-label="Zapisy na sekundę w czasie porządkowania tabeli: VACUUM FULL zatrzymuje zapisy na całą operację, REPACK (CONCURRENTLY) tylko na końcu"></svg><div class="tip" id="tip"></div></div>
+<p class="cap" id="maincap"></p>
+</div>
+</div>
+</header>
+
+<section class="band" id="problem">
+<div class="wrap grid2">
+<div>
+<h2>Skąd problem: plik tabeli nie maleje sam</h2>
+<p>PostgreSQL przy <code>UPDATE</code> i <code>DELETE</code> nie nadpisuje wiersza w miejscu. Stara wersja zostaje w pliku, bo inna transakcja może jej jeszcze potrzebować (MVCC).</p>
+<p>Zwykły <code>VACUUM</code> oznacza to miejsce jako wolne do ponownego użycia, ale nie oddaje go systemowi. W naszym teście po usunięciu połowy z 20 mln wierszy plik dalej miał <b>2,3 GB</b>.</p>
+<p>Żeby odzyskać dysk, trzeba przepisać tabelę do nowego, ciasnego pliku i podmienić stary. Pytanie brzmi, co w tym czasie dzieje się z aplikacją.</p>
+</div>
+<figure class="diagram">
+<div class="sx"><svg id="bloat" viewBox="0 0 560 300" role="img" aria-label="Plik po DELETE i VACUUM ma 2,3 GB, w połowie puste strony; po przepisaniu 1,2 GB bez dziur"></svg></div>
+<figcaption>Każdy kwadrat to fragment pliku. Przepisanie zostawia tylko żywe wiersze: 2,3 GB → 1,2 GB w obu poleceniach.</figcaption>
+</figure>
+</div>
+</section>
+
+<section class="band alt" id="mechanizm">
+<div class="wrap">
+<h2>Jak działają oba polecenia: ta sama praca, inna blokada</h2>
+<p>Oba robią nową kopię tabeli. Różni je to, jak mocno trzymają tabelę w trakcie i kiedy aplikacja musi czekać.</p>
+<figure class="diagram">
+<div class="sx"><svg id="phases" viewBox="0 0 1000 330" role="img" aria-label="VACUUM FULL trzyma ACCESS EXCLUSIVE przez całą operację; REPACK CONCURRENTLY kopiuje pod SHARE UPDATE EXCLUSIVE, zbiera zmiany i dopiero na końcu bierze ACCESS EXCLUSIVE"></svg></div>
+<figcaption>Fazy i blokady według dokumentacji PostgreSQL 19 (REPACK). Długości z naszego pomiaru przy 4 sesjach: VACUUM FULL ok. 14 s, REPACK (CONCURRENTLY) ok. 32 s, z czego ok. 5 s pełnej blokady.</figcaption>
+</figure>
+<div class="do" style="margin-top:22px">
+<div><h3>VACUUM FULL</h3><p>Od pierwszej do ostatniej sekundy blokada <code>ACCESS EXCLUSIVE</code>: nikt nie czyta ani nie pisze do tej tabeli. Reszta bazy działa.</p></div>
+<div><h3>REPACK (CONCURRENTLY)</h3><p>Kopiuje pod <code>SHARE UPDATE EXCLUSIVE</code>, więc aplikacja czyta i pisze. Zmiany z tego czasu zbiera dekodowaniem logicznym (zużywa slot z <code>max_repack_replication_slots</code>, domyślnie 5).</p></div>
+<div><h3>Faza końcowa</h3><p>Pod <code>ACCESS EXCLUSIVE</code> nanosi ostatnie zebrane zmiany i podmienia pliki. To jedyne sekundy, kiedy zapisy stoją. Potrzebny klucz główny albo replica identity na indeksie.</p></div>
+</div>
+</div>
+</section>
+
+<section class="band" id="ruch">
+<div class="wrap grid2">
+<div>
+<h2>Dlaczego koniec rośnie z ruchem</h2>
+<p>Pomyśl o przeprowadzce biblioteki. <code>VACUUM FULL</code> zamyka drzwi i przestawia wszystkie książki. <code>REPACK (CONCURRENTLY)</code> buduje nowe półki obok, czytelnicy dalej wypożyczają, a każde wypożyczenie trafia do zeszytu. Na koniec drzwi się zamykają, zeszyt jest przepisywany i zmieniają się tabliczki.</p>
+<p>Im więcej wypożyczeń w trakcie, tym grubszy zeszyt i tym dłużej drzwi są zamknięte. Tak układają się nasze liczby: przy 1 sesji 0 s, przy 4 sesjach 5 s, przy 8 sesjach 18 s pełnej blokady. Cała operacja też się wydłuża: 14 → 32 → 93 s.</p>
+<p>Dokumentacja mówi to samo jednym zdaniem: <q lang="en">the lock is typically held for a short time, depending on the amount of changes accumulated while the lock was being waited for</q>. Nasz pomiar pokazuje, ile to „krótko” znaczy w sekundach.</p>
+<p class="note">Biblioteka to nasze porównanie. Przy 8 sesjach 4 procesory wirtualki są zajęte w całości, więc część wydłużenia to zwykła walka o CPU. Niesprawdzone: długa transakcja czytająca tabelę też może opóźnić fazę końcową, bo REPACK czeka wtedy na blokadę, a zapisy ustawiają się za nim w kolejce.</p>
+</div>
+<figure class="diagram">
+<div class="sx"><svg id="log" viewBox="0 0 520 330" role="img" aria-label="Zeszyt zmian rośnie z liczbą sesji: 1 sesja 0 s blokady, 4 sesje 5 s, 8 sesji 18 s"></svg></div>
+<figcaption>Wysokość stosu = sekundy pełnej blokady na końcu REPACK (CONCURRENTLY), mediana z 3 serii. Liczby nad stosem: zapisy na sekundę przed operacją.</figcaption>
+</figure>
+</div>
+</section>
+
+<section class="band alt" id="wyniki">
+<div class="wrap">
+<h2>Wszystkie wyniki: przewaga REPACK topnieje z ruchem, przy 8 sesjach znika</h2>
+<p>Sekundy, w których zapisy stały na zero, mediana z 3 serii. Ta sama tabela, ta sama wersja (PostgreSQL 19.0), różni się tylko polecenie i ruch. Przy 8 sesjach VACUUM FULL wahał się między 15 a 21 s, REPACK 18–19 s; 4 procesory wirtualki były wtedy zajęte w całości, więc ten wynik traktuj jako „porównywalnie albo gorzej”, nie jako dokładną różnicę.</p>
+<div class="rows" id="rows"></div>
+<div class="scroll"><table id="tbl"><thead><tr><th>Sesje</th><th>Polecenie</th><th>Zapisy/s przed</th><th>Czas operacji</th><th>Zapisy/s w trakcie</th><th>Zapisy stoją</th><th>Najdłuższe czekanie</th></tr></thead><tbody></tbody></table></div>
+<p class="note" id="pg18"></p>
+</div>
+</section>
+
+<section class="band" id="co-robic">
+<div class="wrap">
+<h2>Co z tym zrobić</h2>
+<div class="do">
+<div><h3>Uruchamiaj poza szczytem</h3><p>Przy małym ruchu REPACK (CONCURRENTLY) naprawdę nie zatrzymuje zapisów. Pora z najmniejszym ruchem na tabeli skraca fazę końcową.</p></div>
+<div><h3>Daj aplikacji zapas na czekanie</h3><p>Faza końcowa blokuje też odczyty tej tabeli. Sprawdź <code>lock_timeout</code> i <code>statement_timeout</code> po stronie aplikacji: kilka sekund czekania nie może kończyć się błędem dla użytkownika.</p></div>
+<div><h3>Zmierz u siebie, ile trwa koniec</h3><p>W PG19 <code>log_lock_waits</code> jest domyślnie włączone: w logu zobaczysz <code>acquired … after 5818 ms</code>, czyli ile czekały sesje. Przy dużym ruchu porównaj z oknem serwisowym.</p></div>
+</div>
+</div>
+</section>
+
+<section class="band alt" id="warunki">
+<div class="wrap grid2">
+<div>
+<h2>Jak mierzyliśmy</h2>
+<p>VM <code>pgio</code>: Rocky 9.8, 4 vCPU, 3,6 GB RAM, dysk danych na wirtualnym kontrolerze NVMe. PostgreSQL 18.6 i 19.0 z PGDG obok siebie, ta sama konfiguracja (<code>shared_buffers = 1GB</code>), w czasie pomiaru działa jeden klaster, start z pustym cache.</p>
+<p>Tabela <code>bloat_t</code>: 20 mln wierszy, <code>DELETE</code> co drugiego, zwykły <code>VACUUM</code>. Zapisy: <code>pgbench</code> z 1, 4 albo 8 sesjami, każda robi <code>UPDATE</code> losowego wiersza po kluczu głównym; log co sekundę. Operacja startuje po 10 s ruchu.</p>
+</div>
+<div>
+<h3>Czego te liczby nie mówią</h3>
+<p>Sekundy są z jednej wirtualki. Przenosi się kształt: blokada na końcu i jej wzrost z ruchem. Mierzyliśmy tylko zapisy; według dokumentacji <code>ACCESS EXCLUSIVE</code> blokuje też odczyty. Blokowana jest tylko porządkowana tabela, nie cała baza.</p>
+<p>Dwa warunki z dokumentacji, których w pomiarze nie widać: REPACK (CONCURRENTLY) <b>nie jest MVCC-safe</b> (transakcja z migawką sprzed startu zobaczy po nim pustą tabelę; <code>VACUUM FULL</code> tej wady nie ma), a przy ponad ok. 104 mln wierszy zmienionych w trakcie polecenie się przerywa.</p>
+<p class="note">Źródła: <a href="https://www.postgresql.org/docs/19/sql-repack.html">dokumentacja REPACK (PostgreSQL 19)</a>, <a href="https://postgresql.org/about/news/postgresql-19-released-3449">ogłoszenie wydania 19.11.2026</a>. Pomiar 23.11.2026, Agentic DBA Lab, lab i pomiary wykonał Claude Code. Dane: <code>results\repack_*_full\timeline_*.csv</code>.</p>
+</div>
+</div>
+</section>
+
+<script>
+{
+const D = /*__DATA__*/null;
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 0) => v.toLocaleString('pl-PL', {minimumFractionDigits: d, maximumFractionDigits: d});
+const sec = ms => fmt(ms / 1000, ms < 10000 ? 1 : 0) + ' s';
+const med = (v, c) => D.medians.find(m => m.variant === v && m.clients === c);
+const NAME = {vf: 'VACUUM FULL', rc: 'REPACK (CONCURRENTLY)'};
+const COL = {vf: 'var(--vf)', rc: 'var(--rc)'};
+
+// Liczby w pasie / figures in the band
+$('figs').innerHTML = [1, 4, 8].map(c => {
+  const r = med('rc', c), v = med('vf', c);
+  const who = c === 1 ? 'przy 1 sesji' : `przy ${c} sesjach`;
+  return `<div class="fg"><b>${fmt(r.zero_s)} s</b><span>tyle stoją zapisy z REPACK ${who} (VACUUM FULL: ${fmt(v.zero_s)} s)</span></div>`;
+}).join('');
+
+// Główny wykres / main chart
+const svg = $('mainsvg'), tip = $('tip');
+let cur = 4;
+function spans(rows) {
+  const out = []; let s = null;
+  rows.forEach(([t, n, ph]) => {
+    if (ph === 'maint' && n === 0) { if (s === null) s = t; }
+    else if (s !== null) { out.push([s, t]); s = null; }
+  });
+  if (s !== null) out.push([s, rows[rows.length - 1][0] + 1]);
+  return out;
+}
+function opEnd(rows) { let e = 0; rows.forEach(([t, , ph]) => { if (ph === 'maint') e = t + 1; }); return e; }
+function draw() {
+  const W = svg.clientWidth, H = svg.clientHeight;
+  if (!W || !H) return;
+  const narrow = W < 520;
+  const m = {l: narrow ? 40 : 56, r: 14, t: 26, b: 74};
+  // bez 1. sekundy (laczenie sesji) i ostatniej (zamykanie sesji) / drop connect and terminate seconds
+  const S = {vf: D.timelines.vf[cur].slice(1, -1), rc: D.timelines.rc[cur].slice(1, -1)};
+  const t0 = Math.min(S.vf[0][0], S.rc[0][0]);
+  const t1 = Math.max(S.vf[S.vf.length - 1][0], S.rc[S.rc.length - 1][0]) + 1;
+  const ymax = Math.ceil(Math.max(...S.vf.map(r => r[1]), ...S.rc.map(r => r[1])) / 2000) * 2000;
+  const x = t => m.l + (t - t0) / (t1 - t0) * (W - m.l - m.r);
+  const y = v => m.t + (1 - v / ymax) * (H - m.t - m.b);
+  const step = ymax / 4;
+  let g = `<defs><pattern id="h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="2" height="6" fill="var(--lock)"/></pattern></defs>`;
+  for (let v = 0; v <= ymax; v += step) {
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule)"/>`;
+    g += `<text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="13" fill="var(--muted)">${narrow && v ? fmt(v / 1000) + 'k' : fmt(v)}</text>`;
+  }
+  const tickStep = (t1 - t0) > 90 ? 20 : 10;
+  for (let t = Math.ceil(t0 / tickStep) * tickStep; t < t1; t += tickStep) {
+    g += `<line x1="${x(t)}" x2="${x(t)}" y1="${H - m.b}" y2="${H - m.b + 5}" stroke="var(--muted)"/>`;
+    g += `<text x="${x(t)}" y="${H - m.b + 19}" text-anchor="middle" font-size="13" fill="var(--muted)">${t} s</text>`;
+  }
+  g += `<text x="${m.l}" y="${m.t - 10}" font-size="13" fill="var(--ink2)">zapisy na sekundę</text>`;
+  ['vf', 'rc'].forEach(k => spans(S[k]).forEach(([a, b]) => {
+    g += `<rect x="${x(a)}" y="${m.t}" width="${Math.max(2, x(b) - x(a))}" height="${H - m.t - m.b}" fill="url(#h)" opacity=".38"/>`;
+    g += `<rect x="${x(a)}" y="${H - m.b - 4}" width="${Math.max(2, x(b) - x(a))}" height="4" fill="${COL[k]}"/>`;
+  }));
+  g += `<line x1="${x(0)}" x2="${x(0)}" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink)" stroke-dasharray="3 3"/>`;
+  g += `<text x="${x(0) + 6}" y="${m.t + 14}" font-size="13" fill="var(--ink)">start operacji</text>`;
+  ['vf', 'rc'].forEach(k => {
+    const pts = S[k].map(([t, n]) => `${x(t).toFixed(1)},${y(n).toFixed(1)}`).join(' ');
+    g += `<polyline points="${pts}" fill="none" stroke="${COL[k]}" stroke-width="2" stroke-linejoin="round"/>`;
+  });
+  // Paski czasu operacji pod osią / operation duration bars under the axis
+  ['vf', 'rc'].forEach((k, i) => {
+    const e = opEnd(S[k]), yy = H - m.b + 34 + i * 20;
+    g += `<rect x="${x(0)}" y="${yy - 9}" width="${Math.max(2, x(e) - x(0))}" height="8" rx="2" fill="${COL[k]}" opacity=".85"/>`;
+    const lbl = `${narrow ? (k === 'vf' ? 'VF' : 'REPACK') : NAME[k]}: ${fmt(e)} s`;
+    const lx = x(e) + 8, fits = lx + lbl.length * 8.4 < W - 4;
+    g += `<text x="${fits ? lx : x(e) - 8}" y="${yy}" text-anchor="${fits ? 'start' : 'end'}" font-size="13" fill="var(--ink)">${lbl}</text>`;
+  });
+  g += `<rect id="hit" x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/>`;
+  g += `<line id="cross" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--ink2)" opacity="0"/>`;
+  svg.innerHTML = g;
+  const hit = $('hit'), cross = $('cross');
+  hit.addEventListener('pointermove', ev => {
+    const bx = svg.getBoundingClientRect();
+    const px = ev.clientX - bx.left;
+    const t = Math.round(t0 + (px - m.l) / (W - m.l - m.r) * (t1 - t0));
+    const val = k => { const r = S[k].find(r => r[0] === t); return r ? fmt(r[1]) + '/s' : '—'; };
+    cross.setAttribute('x1', x(t)); cross.setAttribute('x2', x(t)); cross.setAttribute('opacity', '.6');
+    tip.innerHTML = `<b>${t} s</b><br>VACUUM FULL: ${val('vf')}<br>REPACK: ${val('rc')}`;
+    tip.style.opacity = 1;
+    tip.style.left = Math.min(px + 12, W - 170) + 'px';
+    tip.style.top = (m.t + 8) + 'px';
+  });
+  hit.addEventListener('pointerleave', () => { tip.style.opacity = 0; cross.setAttribute('opacity', '0'); });
+  const r = med('rc', cur), v = med('vf', cur);
+  $('maincap').textContent = `${cur === 1 ? '1 sesja' : cur + (cur === 4 ? ' sesje' : ' sesji')}, seria 1 z 3. VACUUM FULL: zapisy stoją ${fmt(v.zero_s)} s z ${sec(v.op_ms)}. REPACK (CONCURRENTLY): ${fmt(r.zero_s)} s z ${sec(r.op_ms)}, najdłuższe czekanie ${sec(r.maxwait_ms)} (VACUUM FULL ${sec(v.maxwait_ms)}). Mediany z 3 serii.`;
+}
+const ro = new ResizeObserver(draw); ro.observe(svg);
+document.querySelectorAll('.ctl button').forEach(b => b.addEventListener('click', () => {
+  cur = +b.dataset.c;
+  document.querySelectorAll('.ctl button').forEach(o => o.setAttribute('aria-pressed', o === b));
+  draw();
+}));
+
+// Diagram: rozdęta tabela / bloated table
+{
+  let g = ''; const n = 8, sz = 26, gap = 4;
+  for (let i = 0; i < 48; i++) {
+    const cx = 20 + (i % n) * (sz + gap), cy = 54 + Math.floor(i / n) * (sz + gap);
+    g += `<rect x="${cx}" y="${cy}" width="${sz}" height="${sz}" rx="3" ${i % 2 ? 'fill="none" stroke="var(--muted)" stroke-dasharray="3 3"' : 'fill="var(--rc)"'}/>`;
+  }
+  for (let i = 0; i < 24; i++) {
+    const cx = 330 + (i % 6) * (sz + gap), cy = 54 + Math.floor(i / 6) * (sz + gap);
+    g += `<rect x="${cx}" y="${cy}" width="${sz}" height="${sz}" rx="3" fill="var(--rc)"/>`;
+  }
+  g += `<text x="20" y="34" font-size="15" font-weight="600" fill="var(--ink)">Po DELETE + VACUUM: 2,3 GB</text>`;
+  g += `<text x="330" y="34" font-size="15" font-weight="600" fill="var(--ink)">Po przepisaniu: 1,2 GB</text>`;
+  g += `<path d="M268 140 H316" stroke="var(--ink)" stroke-width="2" marker-end="url(#ar)"/><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink)"/></marker></defs>`;
+  g += `<text x="292" y="128" text-anchor="middle" font-size="13" fill="var(--ink2)">kopia</text>`;
+  g += `<rect x="20" y="250" width="14" height="14" rx="3" fill="var(--rc)"/><text x="42" y="262" font-size="13" fill="var(--ink2)">żywe wiersze</text>`;
+  g += `<rect x="150" y="250" width="14" height="14" rx="3" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/><text x="172" y="262" font-size="13" fill="var(--ink2)">wolne miejsce, którego plik nie oddaje</text>`;
+  $('bloat').innerHTML = g;
+}
+
+// Diagram: fazy i blokady / phases and locks (skala z pomiaru przy 4 sesjach)
+{
+  const L = 170, R = 840, T = 34, sc = (R - L) / 34;
+  const X = s => L + s * sc;
+  let g = `<defs><pattern id="h2" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="2" height="6" fill="var(--lock)"/></pattern><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink2)"/></marker></defs>`;
+  const lane = (y0, title, k) => `<text x="0" y="${y0 + 26}" font-size="16" font-weight="600" fill="var(--ink)">${title}</text><rect x="0" y="${y0 + 34}" width="4" height="70" fill="${COL[k]}"/>`;
+  // VACUUM FULL
+  g += lane(T, 'VACUUM FULL', 'vf');
+  g += `<rect x="${X(0)}" y="${T + 10}" width="${X(14) - X(0)}" height="26" rx="4" fill="${COL.vf}"/><text x="${X(0) + 10}" y="${T + 28}" font-size="13" fill="#fff" stroke="none">kopia + indeksy</text>`;
+  g += `<rect x="${X(0)}" y="${T + 44}" width="${X(14) - X(0)}" height="22" fill="url(#h2)" opacity=".55"/><text x="${X(14) + 8}" y="${T + 60}" font-size="13" fill="var(--ink)">ACCESS EXCLUSIVE przez całą operację</text>`;
+  g += `<text x="${X(0)}" y="${T + 92}" font-size="13" fill="var(--ink2)">aplikacja: czeka 14 s</text>`;
+  // REPACK (CONCURRENTLY)
+  const T2 = T + 140;
+  g += lane(T2, 'REPACK', 'rc') + `<text x="0" y="${T2 + 46}" font-size="13" fill="var(--ink2)">(CONCURRENTLY)</text>`;
+  g += `<rect x="${X(0)}" y="${T2 + 10}" width="${X(27) - X(0) - 3}" height="26" rx="4" fill="${COL.rc}"/><text x="${X(0) + 10}" y="${T2 + 28}" font-size="13" fill="#fff" stroke="none">kopia + indeksy, aplikacja dalej pisze</text>`;
+  g += `<rect x="${X(27)}" y="${T2 + 10}" width="${X(32) - X(27)}" height="26" rx="4" fill="none" stroke="${COL.rc}" stroke-width="2"/><text x="${X(29.5)}" y="${T2 + 28}" text-anchor="middle" font-size="13" fill="var(--ink)">koniec</text>`;
+  g += `<rect x="${X(0)}" y="${T2 + 44}" width="${X(27) - X(0) - 3}" height="22" rx="2" fill="none" stroke="var(--lock)" stroke-dasharray="4 3"/><text x="${X(1)}" y="${T2 + 60}" font-size="13" fill="var(--ink2)">SHARE UPDATE EXCLUSIVE (czytanie i pisanie wolne)</text>`;
+  g += `<rect x="${X(27)}" y="${T2 + 44}" width="${X(32) - X(27)}" height="22" fill="url(#h2)" opacity=".55"/><text x="${X(32) + 8}" y="${T2 + 60}" font-size="13" fill="var(--ink)">ACCESS EXCLUSIVE</text>`;
+  for (let s = 3; s < 26; s += 4) g += `<path d="M${X(s)} ${T2 + 104} V${T2 + 72}" stroke="var(--ink2)" stroke-width="1.5" marker-end="url(#a2)"/>`;
+  g += `<text x="${X(0)}" y="${T2 + 122}" font-size="13" fill="var(--ink2)">zmiany aplikacji → dekodowanie logiczne → nanoszone na kopię</text>`;
+  g += `<text x="${X(27)}" y="${T2 + 92}" font-size="13" fill="var(--ink)">aplikacja czeka ok. 5 s</text>`;
+  // oś czasu
+  g += `<line x1="${X(0)}" x2="${X(34)}" y1="${T + 112}" y2="${T + 112}" stroke="var(--rule)"/>`;
+  [0, 10, 20, 30].forEach(s => g += `<text x="${X(s)}" y="${T + 128}" font-size="12" fill="var(--muted)" text-anchor="middle">${s} s</text>`);
+  $('phases').innerHTML = g;
+}
+
+// Diagram: zeszyt zmian / change log stack
+{
+  const cs = [1, 4, 8], base = 290, k = 11;
+  let g = '';
+  cs.forEach((c, i) => {
+    const r = med('rc', c), x0 = 40 + i * 160, h = Math.max(4, r.zero_s * k);
+    const pages = Math.max(1, Math.round(h / 9));
+    for (let p = 0; p < pages; p++) g += `<rect x="${x0 + (p % 2) * 3}" y="${base - (p + 1) * 9}" width="110" height="7" rx="2" fill="var(--rc)" opacity="${0.45 + 0.55 * (p + 1) / pages}"/>`;
+    g += `<text x="${x0 + 55}" y="${base - pages * 9 - 30}" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">${fmt(r.zero_s)} s</text>`;
+    g += `<text x="${x0 + 55}" y="${base - pages * 9 - 12}" text-anchor="middle" font-size="13" fill="var(--ink2)">${fmt(Math.round(r.tps_before / 100) * 100)} zapisów/s</text>`;
+    g += `<text x="${x0 + 55}" y="${base + 22}" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">${c === 1 ? '1 sesja' : c + (c === 4 ? ' sesje' : ' sesji')}</text>`;
+  });
+  g += `<line x1="20" x2="500" y1="${base}" y2="${base}" stroke="var(--ink)"/>`;
+  $('log').innerHTML = g;
+}
+
+// Wiersze i tabela / rows and table
+{
+  const maxZ = Math.max(...D.medians.map(m => m.zero_s));
+  $('rows').innerHTML = [1, 4, 8].map(c => {
+    const bar = k => { const m = med(k, c); const w = m.zero_s / maxZ * 82; return `<div class="bar"><i style="width:${Math.max(w, 0.6)}%;background:${COL[k]}"></i><em style="left:${Math.max(w, 0.6)}%">${NAME[k]}: ${fmt(m.zero_s)} s</em></div>`; };
+    return `<div class="row"><div>${c === 1 ? '1 sesja' : c + (c === 4 ? ' sesje' : ' sesji')}</div><div>${bar('vf')}${bar('rc')}</div></div>`;
+  }).join('');
+  $('tbl').querySelector('tbody').innerHTML = [1, 4, 8].flatMap(c => ['vf', 'rc'].map(k => {
+    const m = med(k, c);
+    return `<tr><td>${c}</td><td>${NAME[k]}</td><td>${fmt(m.tps_before)}</td><td>${sec(m.op_ms)}</td><td>${fmt(m.tps_maint)}</td><td>${fmt(m.zero_s)} s</td><td>${sec(m.maxwait_ms)}</td></tr>`;
+  })).join('');
+  $('pg18').textContent = D.pg18 ? `Dla porównania PostgreSQL 18, VACUUM FULL przy 4 sesjach: ${sec(D.pg18.op_ms)}, zapisy stoją ${fmt(D.pg18.zero_s)} s, czyli tak samo jak w 19 (13,7 s). Sama wersja nie zmienia starego polecenia; różnicę robi nowe polecenie. Serii: ${D.nseries}.` : '';
+}
+}
+</script>
+</body>
+</html>

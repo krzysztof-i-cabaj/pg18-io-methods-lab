@@ -1,0 +1,22 @@
+Performing Consistency Checks on Old Live Server
+------------------------------------------------
+Checking cluster versions                                     ok
+Checking database connection settings                         ok
+Checking for unsupported encodings                            ok
+Checking names of databases, roles, and tablespaces           ok
+Checking database user is the install user                    ok
+Checking for prepared transactions                            ok
+Checking oldestXID and oldestMultiXid consistency             ok
+Checking for contrib/isn with bigint-passing mismatch         ok
+Checking logical replication slots                            ok
+Checking subscription state                                   ok
+Checking data type usage                                      ok
+Checking for objects affected by Unicode update               ok
+Checking for not-null constraint inconsistencies              ok
+Checking for uses of gist_inet_ops/gist_cidr_ops              ok
+Checking for presence of required libraries                   ok
+Checking database user is the install user                    ok
+Checking for prepared transactions                            ok
+Checking new cluster tablespace directories                   ok
+
+*Clusters are compatible*

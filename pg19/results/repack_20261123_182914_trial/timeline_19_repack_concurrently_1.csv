@@ -1,0 +1,13 @@
+t_s,tps,max_lat_ms,phase
+-5,2114,7.8,before
+-4,6456,2.9,before
+-3,8526,2.7,before
+-2,10615,1.5,before
+-1,10746,2.9,before
+0,7999,7.1,before
+1,9795,7.8,after
+2,12394,1.0,after
+3,7965,3.6,after
+4,3656,4.9,after
+5,9367,1.5,after
+6,0,0.0,after
