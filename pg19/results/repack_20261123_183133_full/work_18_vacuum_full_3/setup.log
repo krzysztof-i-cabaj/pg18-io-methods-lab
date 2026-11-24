@@ -1,0 +1,4 @@
+18.6|20000000|
+psql:/root/pg19lab/sql/10_bloat_table.sql:32: NOTICE:  table "bloat_t" does not exist, skipping
+
+10000000|2404 MB|561 MB

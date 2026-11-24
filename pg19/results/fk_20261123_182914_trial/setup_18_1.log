@@ -1,0 +1,4 @@
+18.6|100000|
+psql:/root/pg19lab/sql/20_fk_tables.sql:30: NOTICE:  table "zamowienie" does not exist, skipping
+psql:/root/pg19lab/sql/20_fk_tables.sql:31: NOTICE:  table "klient" does not exist, skipping
+100000|7344 kB

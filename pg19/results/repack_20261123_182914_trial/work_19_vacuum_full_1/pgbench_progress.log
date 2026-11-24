@@ -1,0 +1,16 @@
+progress: 1.0 s, 7037.3 tps, lat 0.560 ms stddev 0.267, 0 failed
+progress: 2.0 s, 10105.2 tps, lat 0.394 ms stddev 0.124, 0 failed
+progress: 3.0 s, 11488.5 tps, lat 0.346 ms stddev 0.107, 0 failed
+progress: 4.0 s, 12249.6 tps, lat 0.324 ms stddev 0.088, 0 failed
+progress: 5.0 s, 12392.9 tps, lat 0.321 ms stddev 0.100, 0 failed
+progress: 6.0 s, 8487.9 tps, lat 0.469 ms stddev 5.001, 0 failed
+progress: 7.0 s, 10772.5 tps, lat 0.369 ms stddev 0.099, 0 failed
+progress: 8.0 s, 11121.0 tps, lat 0.358 ms stddev 0.102, 0 failed
+progress: 9.0 s, 12180.2 tps, lat 0.326 ms stddev 0.092, 0 failed
+progress: 10.0 s, 10590.3 tps, lat 0.376 ms stddev 0.094, 0 failed
+pgbench: error: client 0 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 1 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+FATAL:  terminating connection due to administrator command
+pgbench: error: client 2 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 3 aborted in command 1 (SQL) of script 0; perhaps the backend died while processing
+pgbench: error: unexpected error status: 2

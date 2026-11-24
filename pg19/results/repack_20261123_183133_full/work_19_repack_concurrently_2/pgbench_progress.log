@@ -1,0 +1,59 @@
+progress: 1.0 s, 4650.6 tps, lat 0.851 ms stddev 0.348, 0 failed
+progress: 2.0 s, 4959.9 tps, lat 0.804 ms stddev 0.277, 0 failed
+progress: 3.0 s, 5049.1 tps, lat 0.790 ms stddev 0.277, 0 failed
+progress: 4.0 s, 5301.3 tps, lat 0.753 ms stddev 0.288, 0 failed
+progress: 5.0 s, 5363.6 tps, lat 0.743 ms stddev 0.293, 0 failed
+progress: 6.0 s, 5263.9 tps, lat 0.757 ms stddev 0.299, 0 failed
+progress: 7.0 s, 5663.6 tps, lat 0.704 ms stddev 0.279, 0 failed
+progress: 8.0 s, 5852.1 tps, lat 0.681 ms stddev 0.277, 0 failed
+progress: 9.0 s, 5944.7 tps, lat 0.670 ms stddev 0.298, 0 failed
+progress: 10.0 s, 6144.8 tps, lat 0.649 ms stddev 0.304, 0 failed
+progress: 11.0 s, 2171.1 tps, lat 1.840 ms stddev 1.176, 0 failed
+progress: 12.0 s, 2239.4 tps, lat 1.784 ms stddev 1.977, 0 failed
+progress: 13.0 s, 2187.0 tps, lat 1.770 ms stddev 2.125, 0 failed
+progress: 14.0 s, 1610.5 tps, lat 2.560 ms stddev 2.730, 0 failed
+progress: 15.0 s, 2069.3 tps, lat 1.932 ms stddev 3.482, 0 failed
+progress: 16.0 s, 1987.0 tps, lat 2.010 ms stddev 6.387, 0 failed
+progress: 17.0 s, 2253.1 tps, lat 1.775 ms stddev 2.993, 0 failed
+progress: 18.0 s, 1750.9 tps, lat 2.281 ms stddev 4.753, 0 failed
+progress: 19.0 s, 2249.2 tps, lat 1.778 ms stddev 3.793, 0 failed
+progress: 20.0 s, 2805.4 tps, lat 1.424 ms stddev 2.077, 0 failed
+progress: 21.0 s, 5148.8 tps, lat 0.776 ms stddev 0.708, 0 failed
+progress: 22.0 s, 4569.0 tps, lat 0.874 ms stddev 2.507, 0 failed
+progress: 23.0 s, 5325.8 tps, lat 0.750 ms stddev 1.449, 0 failed
+progress: 24.0 s, 6309.2 tps, lat 0.633 ms stddev 0.502, 0 failed
+progress: 25.0 s, 5090.7 tps, lat 0.785 ms stddev 1.236, 0 failed
+progress: 26.0 s, 6017.2 tps, lat 0.664 ms stddev 1.578, 0 failed
+progress: 27.0 s, 5707.6 tps, lat 0.699 ms stddev 1.086, 0 failed
+progress: 28.0 s, 4797.9 tps, lat 0.831 ms stddev 0.920, 0 failed
+progress: 29.0 s, 3910.4 tps, lat 1.021 ms stddev 0.601, 0 failed
+progress: 30.0 s, 4664.2 tps, lat 0.855 ms stddev 0.492, 0 failed
+progress: 31.0 s, 4728.0 tps, lat 0.844 ms stddev 0.483, 0 failed
+progress: 32.0 s, 4772.1 tps, lat 0.836 ms stddev 0.382, 0 failed
+progress: 33.0 s, 4928.3 tps, lat 0.809 ms stddev 0.393, 0 failed
+progress: 34.0 s, 4358.6 tps, lat 0.915 ms stddev 0.683, 0 failed
+progress: 35.0 s, 4831.2 tps, lat 0.826 ms stddev 0.431, 0 failed
+progress: 36.0 s, 4217.0 tps, lat 0.947 ms stddev 0.553, 0 failed
+progress: 37.0 s, 4243.8 tps, lat 0.940 ms stddev 0.567, 0 failed
+progress: 38.0 s, 1425.8 tps, lat 0.914 ms stddev 0.529, 0 failed
+progress: 39.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 40.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 41.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 42.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 43.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 44.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 45.0 s, 5670.2 tps, lat 5.416 ms stddev 180.560, 0 failed
+progress: 46.0 s, 6953.9 tps, lat 0.573 ms stddev 0.417, 0 failed
+progress: 47.0 s, 7491.7 tps, lat 0.531 ms stddev 0.458, 0 failed
+progress: 48.0 s, 7767.2 tps, lat 0.512 ms stddev 0.352, 0 failed
+progress: 49.0 s, 7686.7 tps, lat 0.518 ms stddev 0.313, 0 failed
+progress: 50.0 s, 7247.5 tps, lat 0.549 ms stddev 0.353, 0 failed
+progress: 51.0 s, 7008.2 tps, lat 0.568 ms stddev 0.462, 0 failed
+progress: 52.0 s, 7378.3 tps, lat 0.539 ms stddev 0.395, 0 failed
+progress: 53.0 s, 7270.6 tps, lat 0.547 ms stddev 0.332, 0 failed
+progress: 54.0 s, 7970.1 tps, lat 0.499 ms stddev 0.324, 0 failed
+pgbench: error: client 1 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 3 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 0 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 2 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: unexpected error status: 2

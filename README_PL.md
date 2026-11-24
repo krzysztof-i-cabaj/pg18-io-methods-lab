@@ -11,6 +11,10 @@
 
 **Raport interaktywny:** <https://krzysztof-i-cabaj.github.io/pg18-io-methods-lab/index_pl.html> · Markdown: [docs/RESULTS_PL.md](docs/RESULTS_PL.md)
 
+> 🆕 **Ciąg dalszy na tej samej VM: PostgreSQL 19 kontra 18** — `REPACK (CONCURRENTLY)` kontra `VACUUM FULL` przy 1/4/8 sesjach
+> zapisujących (zapisy stoją 0 / 5 / 18 s wobec 11 / 13 / 15 s), klucze obce przy masowym INSERT 1,92× szybciej,
+> `pg_upgrade --check` 18 → 19. → [pg19/](pg19/README_PL.md) · [strona interaktywna](https://krzysztof-i-cabaj.github.io/pg18-io-methods-lab/pg19/index_pl.html)
+
 ## 📊 Wyniki
 
 Zimny cache, mediana z 7 przeplatanych serii (główny pomiar, dysk danych na emulowanym kontrolerze SATA) i z 3 serii
@@ -73,7 +77,8 @@ Zimny cache = zatrzymanie PostgreSQL, wyczyszczenie cache stron systemu i start 
 ├── bench/                        # tests.conf, plan_check.sh, run_bench.sh
 ├── report/make_report.py         # CSV → RESULTS.md, wykresy SVG, GitHub Pages
 ├── results/                      # surowe CSV, plany JSON, logi, karta środowiska; control_nvme/ = test kontrolny
-└── docs/                         # INSTALL, METHODOLOGY, RESULTS (EN + PL), strona GitHub Pages
+├── pg19/                         # ciąg dalszy: PostgreSQL 19 kontra 18 na tej samej VM (REPACK, FK, pg_upgrade --check)
+└── docs/                         # INSTALL, METHODOLOGY, RESULTS (EN + PL), strona GitHub Pages (pg19/ = strona ciągu dalszego)
 ```
 
 ## 📋 Wymagania

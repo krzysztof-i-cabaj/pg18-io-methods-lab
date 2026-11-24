@@ -11,6 +11,10 @@
 
 **Interactive report:** <https://krzysztof-i-cabaj.github.io/pg18-io-methods-lab/> · Markdown: [docs/RESULTS.md](docs/RESULTS.md)
 
+> 🆕 **Follow-up on the same VM: PostgreSQL 19 vs 18** — `REPACK (CONCURRENTLY)` vs `VACUUM FULL` under 1/4/8 writing sessions
+> (writes stalled 0 / 5 / 18 s vs 11 / 13 / 15 s), foreign keys on bulk INSERT 1.92× faster, `pg_upgrade --check` 18 → 19.
+> → [pg19/](pg19/README.md) · [interactive page](https://krzysztof-i-cabaj.github.io/pg18-io-methods-lab/pg19/)
+
 ## 📊 Results
 
 Cold cache, median of 7 interleaved series (main run, data disk on an emulated SATA controller) and of 3 series
@@ -73,7 +77,8 @@ Cold = PostgreSQL stopped, OS page cache dropped, PostgreSQL started before **ev
 ├── bench/                        # tests.conf, plan_check.sh, run_bench.sh
 ├── report/make_report.py         # CSV → RESULTS.md, SVG charts, GitHub Pages
 ├── results/                      # raw CSV, JSON plans, logs, environment card; control_nvme/ = control run
-└── docs/                         # INSTALL, METHODOLOGY, RESULTS (EN + PL), GitHub Pages site
+├── pg19/                         # follow-up: PostgreSQL 19 vs 18 on the same VM (REPACK, FK, pg_upgrade --check)
+└── docs/                         # INSTALL, METHODOLOGY, RESULTS (EN + PL), GitHub Pages site (pg19/ = follow-up page)
 ```
 
 ## 📋 Requirements

@@ -1,0 +1,276 @@
+18:29:14 [run] START suite=all tryb=trial R: 1x (18:vacuum_full 19:vacuum_full 19:repack_concurrently), 400000 wierszy; F: 1x, 200000 wierszy; ts=20261123_182914_trial
+18:29:14 [repack] PG18 vacuum_full seria 1: 400000 wierszy, 4 klientow, warmup 5s, cooldown 5s
+18:29:14 [repack] operacja / command: VACUUM FULL bloat_t
+18:29:15 [repack] utworzono baze / created database labtest w PG18
+18:29:17 [repack] przed / before: tabela 48.1 MB, indeksy 11.3 MB
+18:29:22 [repack] operacja / command: rc=0, 292 ms
+18:29:28 [repack] po / after: tabela 24.4 MB, indeksy 5.6 MB, wierszy 200000 (oczekiwane 200000), ok=1
+18:29:29 [repack] tps przed 11606, w trakcie 32485, sekund z 0 tps 0, maks. opoznienie 242 ms
+18:29:29 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_182914_trial.csv
+18:29:29 [repack] PG19 vacuum_full seria 1: 400000 wierszy, 4 klientow, warmup 5s, cooldown 5s
+18:29:29 [repack] operacja / command: VACUUM FULL bloat_t
+18:29:29 [repack] utworzono baze / created database labtest w PG19
+18:29:31 [repack] przed / before: tabela 48.1 MB, indeksy 11.3 MB
+18:29:37 [repack] operacja / command: rc=0, 269 ms
+18:29:43 [repack] po / after: tabela 24.5 MB, indeksy 5.6 MB, wierszy 200000 (oczekiwane 200000), ok=1
+18:29:43 [repack] tps przed 11913, w trakcie 0, sekund z 0 tps 0, maks. opoznienie 231 ms
+18:29:43 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_182914_trial.csv
+18:29:43 [repack] PG19 repack_concurrently seria 1: 400000 wierszy, 4 klientow, warmup 5s, cooldown 5s
+18:29:43 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+18:29:46 [repack] przed / before: tabela 48.1 MB, indeksy 11.3 MB
+18:29:52 [repack] operacja / command: rc=0, 569 ms
+18:29:58 [repack] po / after: tabela 24.5 MB, indeksy 5.6 MB, wierszy 200000 (oczekiwane 200000), ok=1
+18:29:58 [repack] tps przed 9787, w trakcie 0, sekund z 0 tps 0, maks. opoznienie 8 ms
+18:29:58 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_182914_trial.csv
+18:29:58 [fk] PG18 seria 1: 200000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:30:01 [fk] fk: wykonanie 1345 ms, zegar 1400 ms, triggery 1121 ms / 200000 wywolan, wierszy 200000, ok=1
+18:30:01 [fk] nofk: wykonanie 236 ms, zegar 284 ms, triggery 0 ms / 0 wywolan, wierszy 200000, ok=1
+18:30:01 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_182914_trial.csv
+18:30:01 [fk] PG19 seria 1: 200000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:30:03 [fk] fk: wykonanie 742 ms, zegar 794 ms, triggery 541 ms / 200000 wywolan, wierszy 200000, ok=1
+18:30:04 [fk] nofk: wykonanie 203 ms, zegar 243 ms, triggery 0 ms / 0 wywolan, wierszy 200000, ok=1
+18:30:04 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_182914_trial.csv
+18:30:04 [upgcheck] PG18: kodowanie UTF8, provider c, collate en_US.UTF-8, ctype en_US.UTF-8, checksums on
+18:30:04 [upgcheck] initdb: /usr/pgsql-19/bin/initdb -D /pgdata/19/upgcheck -E UTF8 --locale-provider=libc --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8 --data-checksums
+18:30:06 [upgcheck] pg_upgrade --check copy: rc=0 -> check_copy.txt
+    *Clusters are compatible*
+18:30:06 [upgcheck] pg_upgrade --check link: rc=0 -> check_link.txt
+    *Clusters are compatible*
+18:30:06 [upgcheck] usunieto klaster pomocniczy / removed helper cluster /pgdata/19/upgcheck
+18:30:07 [upgcheck] KONIEC / done -> /root/pg19lab/results/upgrade_check_20261123_182914_trial
+18:30:07 [run] KONIEC suite=all fail=0 czas 52602 ms; wyniki: /root/pg19lab/results/*_20261123_182914_trial*
+18:31:33 [run] START suite=all tryb=full R: 3x (18:vacuum_full 19:vacuum_full 19:repack_concurrently), 20000000 wierszy; F: 5x, 5000000 wierszy; ts=20261123_183133_full
+18:31:33 [repack] PG18 vacuum_full seria 1: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:31:33 [repack] operacja / command: VACUUM FULL bloat_t
+18:33:27 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:33:51 [repack] operacja / command: rc=0, 14191 ms
+18:34:04 [repack] po / after: tabela 1211.0 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:34:04 [repack] tps przed 5703, w trakcie 458, sekund z 0 tps 13, maks. opoznienie 14160 ms
+18:34:04 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:34:04 [repack] PG19 vacuum_full seria 1: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:34:04 [repack] operacja / command: VACUUM FULL bloat_t
+18:35:49 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:36:13 [repack] operacja / command: rc=0, 13726 ms
+18:36:27 [repack] po / after: tabela 1210.8 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:36:27 [repack] tps przed 5522, w trakcie 652, sekund z 0 tps 13, maks. opoznienie 13695 ms
+18:36:27 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:36:27 [repack] PG19 repack_concurrently seria 1: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:36:27 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+18:38:15 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:38:57 [repack] operacja / command: rc=0, 32688 ms
+18:39:13 [repack] po / after: tabela 1217.7 MB, indeksy 282.0 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:39:13 [repack] tps przed 5480, w trakcie 3072, sekund z 0 tps 5, maks. opoznienie 5820 ms
+18:39:13 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:39:13 [repack] PG18 vacuum_full seria 2: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:39:13 [repack] operacja / command: VACUUM FULL bloat_t
+18:40:58 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:41:23 [repack] operacja / command: rc=0, 14827 ms
+18:41:35 [repack] po / after: tabela 1211.0 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:41:36 [repack] tps przed 5696, w trakcie 731, sekund z 0 tps 14, maks. opoznienie 14791 ms
+18:41:36 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:41:36 [repack] PG19 vacuum_full seria 2: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:41:36 [repack] operacja / command: VACUUM FULL bloat_t
+18:43:20 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:43:44 [repack] operacja / command: rc=0, 13713 ms
+18:43:57 [repack] po / after: tabela 1210.3 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:43:57 [repack] tps przed 5645, w trakcie 752, sekund z 0 tps 13, maks. opoznienie 13676 ms
+18:43:57 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:43:57 [repack] PG19 repack_concurrently seria 2: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:43:57 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+18:45:41 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:46:25 [repack] operacja / command: rc=0, 34310 ms
+18:46:41 [repack] po / after: tabela 1218.4 MB, indeksy 282.4 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:46:41 [repack] tps przed 5581, w trakcie 3198, sekund z 0 tps 6, maks. opoznienie 6798 ms
+18:46:41 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:46:41 [repack] PG18 vacuum_full seria 3: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:46:41 [repack] operacja / command: VACUUM FULL bloat_t
+18:48:27 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:48:52 [repack] operacja / command: rc=0, 14611 ms
+18:49:04 [repack] po / after: tabela 1210.9 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:49:05 [repack] tps przed 5663, w trakcie 746, sekund z 0 tps 14, maks. opoznienie 14576 ms
+18:49:05 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:49:05 [repack] PG19 vacuum_full seria 3: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:49:05 [repack] operacja / command: VACUUM FULL bloat_t
+18:50:47 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:51:11 [repack] operacja / command: rc=0, 13634 ms
+18:51:24 [repack] po / after: tabela 1210.5 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:51:24 [repack] tps przed 5832, w trakcie 812, sekund z 0 tps 13, maks. opoznienie 13594 ms
+18:51:24 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:51:24 [repack] PG19 repack_concurrently seria 3: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+18:51:24 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+18:53:06 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+18:53:49 [repack] operacja / command: rc=0, 32637 ms
+18:54:04 [repack] po / after: tabela 1218.4 MB, indeksy 282.3 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+18:54:04 [repack] tps przed 5720, w trakcie 3341, sekund z 0 tps 5, maks. opoznienie 6233 ms
+18:54:04 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_183133_full.csv
+18:54:04 [fk] PG18 seria 1: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:54:35 [fk] fk: wykonanie 29194 ms, zegar 29233 ms, triggery 23666 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:54:40 [fk] nofk: wykonanie 5065 ms, zegar 5125 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:54:40 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:54:40 [fk] PG19 seria 1: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:54:56 [fk] fk: wykonanie 14549 ms, zegar 14597 ms, triggery 9440 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:55:02 [fk] nofk: wykonanie 4878 ms, zegar 4930 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:55:02 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:55:02 [fk] PG19 seria 2: 5000000 wierszy, 100000 klientow, kolejnosc: nofk fk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:55:08 [fk] nofk: wykonanie 4861 ms, zegar 4916 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:55:23 [fk] fk: wykonanie 14422 ms, zegar 14474 ms, triggery 9415 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:55:23 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:55:23 [fk] PG18 seria 2: 5000000 wierszy, 100000 klientow, kolejnosc: nofk fk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:55:29 [fk] nofk: wykonanie 5047 ms, zegar 5093 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:55:57 [fk] fk: wykonanie 27642 ms, zegar 27685 ms, triggery 22317 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:55:57 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:55:57 [fk] PG18 seria 3: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:56:27 [fk] fk: wykonanie 28219 ms, zegar 28282 ms, triggery 22803 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:56:32 [fk] nofk: wykonanie 4950 ms, zegar 4999 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:56:32 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:56:32 [fk] PG19 seria 3: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:56:48 [fk] fk: wykonanie 14435 ms, zegar 14482 ms, triggery 9403 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:56:53 [fk] nofk: wykonanie 4777 ms, zegar 4819 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:56:53 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:56:53 [fk] PG19 seria 4: 5000000 wierszy, 100000 klientow, kolejnosc: nofk fk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:57:00 [fk] nofk: wykonanie 4943 ms, zegar 5006 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:57:15 [fk] fk: wykonanie 14383 ms, zegar 14421 ms, triggery 9334 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:57:15 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:57:15 [fk] PG18 seria 4: 5000000 wierszy, 100000 klientow, kolejnosc: nofk fk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:57:21 [fk] nofk: wykonanie 5092 ms, zegar 5150 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:57:49 [fk] fk: wykonanie 27196 ms, zegar 27246 ms, triggery 21891 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:57:49 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:57:49 [fk] PG18 seria 5: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:58:18 [fk] fk: wykonanie 27506 ms, zegar 27557 ms, triggery 22178 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:58:23 [fk] nofk: wykonanie 4943 ms, zegar 5002 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:58:23 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:58:23 [fk] PG19 seria 5: 5000000 wierszy, 100000 klientow, kolejnosc: fk nofk
+NOTICE:  table "zamowienie" does not exist, skipping
+18:58:39 [fk] fk: wykonanie 14155 ms, zegar 14212 ms, triggery 8989 ms / 5000000 wywolan, wierszy 5000000, ok=1
+18:58:44 [fk] nofk: wykonanie 4769 ms, zegar 4815 ms, triggery 0 ms / 0 wywolan, wierszy 5000000, ok=1
+18:58:44 [fk] KONIEC serii / series done -> /root/pg19lab/results/fk_20261123_183133_full.csv
+18:58:44 [upgcheck] PG18: kodowanie UTF8, provider c, collate en_US.UTF-8, ctype en_US.UTF-8, checksums on
+18:58:44 [upgcheck] initdb: /usr/pgsql-19/bin/initdb -D /pgdata/19/upgcheck -E UTF8 --locale-provider=libc --lc-collate=en_US.UTF-8 --lc-ctype=en_US.UTF-8 --data-checksums
+18:58:46 [upgcheck] pg_upgrade --check copy: rc=0 -> check_copy.txt
+    *Clusters are compatible*
+18:58:47 [upgcheck] pg_upgrade --check link: rc=0 -> check_link.txt
+    *Clusters are compatible*
+18:58:47 [upgcheck] usunieto klaster pomocniczy / removed helper cluster /pgdata/19/upgcheck
+18:58:47 [upgcheck] KONIEC / done -> /root/pg19lab/results/upgrade_check_20261123_183133_full
+18:58:47 [run] KONIEC suite=all fail=0 czas 1633952 ms; wyniki: /root/pg19lab/results/*_20261123_183133_full*
+19:21:56 [run] START suite=clients tryb=full R: 3x (18:vacuum_full 19:vacuum_full 19:repack_concurrently), 20000000 wierszy; F: 5x, 5000000 wierszy; ts=20261123_192156_full
+19:21:56 [repack] PG19 repack_concurrently seria 1: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:21:56 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:23:39 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:24:02 [repack] operacja / command: rc=0, 12908 ms
+19:24:17 [repack] po / after: tabela 1207.2 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:24:17 [repack] tps przed 1919, w trakcie 1290, sekund z 0 tps 0, maks. opoznienie 67 ms
+19:24:17 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:24:17 [repack] PG19 repack_concurrently seria 1: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+19:24:17 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:26:01 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:26:43 [repack] operacja / command: rc=0, 32379 ms
+19:26:59 [repack] po / after: tabela 1217.9 MB, indeksy 282.1 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:26:59 [repack] tps przed 5487, w trakcie 3209, sekund z 0 tps 5, maks. opoznienie 6060 ms
+19:26:59 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:26:59 [repack] PG19 repack_concurrently seria 1: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+19:26:59 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:28:42 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:30:20 [repack] operacja / command: rc=0, 88487 ms
+19:30:35 [repack] po / after: tabela 1259.2 MB, indeksy 291.4 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:30:35 [repack] tps przed 9404, w trakcie 5380, sekund z 0 tps 18, maks. opoznienie 19636 ms
+19:30:35 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:30:35 [repack] PG19 repack_concurrently seria 2: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+19:30:35 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:32:18 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:34:02 [repack] operacja / command: rc=0, 93147 ms
+19:34:17 [repack] po / after: tabela 1263.2 MB, indeksy 291.5 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:34:17 [repack] tps przed 9578, w trakcie 5575, sekund z 0 tps 18, maks. opoznienie 19356 ms
+19:34:17 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:34:17 [repack] PG19 repack_concurrently seria 2: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+19:34:17 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:36:01 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:36:44 [repack] operacja / command: rc=0, 33003 ms
+19:36:59 [repack] po / after: tabela 1218.5 MB, indeksy 282.3 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:36:59 [repack] tps przed 5744, w trakcie 3292, sekund z 0 tps 5, maks. opoznienie 6117 ms
+19:37:00 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:37:00 [repack] PG19 repack_concurrently seria 2: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:37:00 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:38:43 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:39:06 [repack] operacja / command: rc=0, 13764 ms
+19:39:21 [repack] po / after: tabela 1207.2 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:39:21 [repack] tps przed 1914, w trakcie 1108, sekund z 0 tps 0, maks. opoznienie 127 ms
+19:39:22 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:39:22 [repack] PG19 repack_concurrently seria 3: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:39:22 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:41:04 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:41:27 [repack] operacja / command: rc=0, 13612 ms
+19:41:42 [repack] po / after: tabela 1207.4 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:41:42 [repack] tps przed 1963, w trakcie 1215, sekund z 0 tps 0, maks. opoznienie 126 ms
+19:41:42 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:41:42 [repack] PG19 repack_concurrently seria 3: 20000000 wierszy, 4 klientow, warmup 10s, cooldown 10s
+19:41:42 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:43:26 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:44:08 [repack] operacja / command: rc=0, 32453 ms
+19:44:23 [repack] po / after: tabela 1218.1 MB, indeksy 282.2 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:44:23 [repack] tps przed 5693, w trakcie 3229, sekund z 0 tps 5, maks. opoznienie 5983 ms
+19:44:23 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:44:23 [repack] PG19 repack_concurrently seria 3: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+19:44:23 [repack] operacja / command: REPACK (CONCURRENTLY) bloat_t
+19:46:06 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:47:55 [repack] operacja / command: rc=0, 98551 ms
+19:48:10 [repack] po / after: tabela 1258.9 MB, indeksy 291.4 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:48:10 [repack] tps przed 9140, w trakcie 4869, sekund z 0 tps 19, maks. opoznienie 20193 ms
+19:48:10 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_192156_full.csv
+19:48:10 [run] KONIEC suite=clients fail=0 czas 1574837 ms; wyniki: /root/pg19lab/results/*_20261123_192156_full*
+19:48:37 [run] START suite=clients tryb=full R: 3x (18:vacuum_full 19:vacuum_full 19:repack_concurrently), 20000000 wierszy; F: 5x, 5000000 wierszy; ts=20261123_194837_full
+19:48:37 [run] clients: wariant vacuum_full, sesje 1 8, serie 3
+19:48:37 [repack] PG19 vacuum_full seria 1: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:48:37 [repack] operacja / command: VACUUM FULL bloat_t
+19:50:26 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:50:48 [repack] operacja / command: rc=0, 12310 ms
+19:51:00 [repack] po / after: tabela 1205.5 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:51:00 [repack] tps przed 1762, w trakcie 162, sekund z 0 tps 11, maks. opoznienie 12267 ms
+19:51:00 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+19:51:00 [repack] PG19 vacuum_full seria 1: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+19:51:00 [repack] operacja / command: VACUUM FULL bloat_t
+19:52:53 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:53:25 [repack] operacja / command: rc=0, 21835 ms
+19:53:37 [repack] po / after: tabela 1205.8 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:53:37 [repack] tps przed 7483, w trakcie 542, sekund z 0 tps 21, maks. opoznienie 21793 ms
+19:53:37 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+19:53:37 [repack] PG19 vacuum_full seria 2: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+19:53:37 [repack] operacja / command: VACUUM FULL bloat_t
+19:56:11 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:56:37 [repack] operacja / command: rc=0, 16151 ms
+19:56:51 [repack] po / after: tabela 1212.1 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:56:51 [repack] tps przed 7558, w trakcie 514, sekund z 0 tps 15, maks. opoznienie 16106 ms
+19:56:51 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+19:56:51 [repack] PG19 vacuum_full seria 2: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:56:51 [repack] operacja / command: VACUUM FULL bloat_t
+19:58:41 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+19:59:03 [repack] operacja / command: rc=0, 12295 ms
+19:59:15 [repack] po / after: tabela 1205.5 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+19:59:15 [repack] tps przed 1569, w trakcie 118, sekund z 0 tps 11, maks. opoznienie 12246 ms
+19:59:16 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+19:59:16 [repack] PG19 vacuum_full seria 3: 20000000 wierszy, 1 klientow, warmup 10s, cooldown 10s
+19:59:16 [repack] operacja / command: VACUUM FULL bloat_t
+20:01:11 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+20:01:34 [repack] operacja / command: rc=0, 13047 ms
+20:01:46 [repack] po / after: tabela 1205.2 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+20:01:46 [repack] tps przed 1690, w trakcie 206, sekund z 0 tps 12, maks. opoznienie 13001 ms
+20:01:46 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+20:01:46 [repack] PG19 vacuum_full seria 3: 20000000 wierszy, 8 klientow, warmup 10s, cooldown 10s
+20:01:46 [repack] operacja / command: VACUUM FULL bloat_t
+20:03:37 [repack] przed / before: tabela 2403.9 MB, indeksy 561.0 MB
+20:04:03 [repack] operacja / command: rc=0, 16153 ms
+20:04:17 [repack] po / after: tabela 1212.5 MB, indeksy 280.8 MB, wierszy 10000000 (oczekiwane 10000000), ok=1
+20:04:17 [repack] tps przed 8709, w trakcie 550, sekund z 0 tps 15, maks. opoznienie 16106 ms
+20:04:17 [repack] KONIEC serii / series done -> /root/pg19lab/results/repack_20261123_194837_full.csv
+20:04:18 [run] KONIEC suite=clients fail=0 czas 940190 ms; wyniki: /root/pg19lab/results/*_20261123_194837_full*

@@ -1,0 +1,57 @@
+progress: 1.0 s, 4421.4 tps, lat 0.896 ms stddev 0.344, 0 failed
+progress: 2.0 s, 4427.3 tps, lat 0.901 ms stddev 0.313, 0 failed
+progress: 3.0 s, 4849.1 tps, lat 0.823 ms stddev 0.290, 0 failed
+progress: 4.0 s, 5144.7 tps, lat 0.776 ms stddev 0.283, 0 failed
+progress: 5.0 s, 5171.0 tps, lat 0.771 ms stddev 0.295, 0 failed
+progress: 6.0 s, 5270.4 tps, lat 0.757 ms stddev 0.295, 0 failed
+progress: 7.0 s, 5160.1 tps, lat 0.772 ms stddev 0.294, 0 failed
+progress: 8.0 s, 5787.6 tps, lat 0.689 ms stddev 0.258, 0 failed
+progress: 9.0 s, 5946.2 tps, lat 0.670 ms stddev 0.283, 0 failed
+progress: 10.0 s, 6191.2 tps, lat 0.644 ms stddev 0.270, 0 failed
+progress: 11.0 s, 2170.9 tps, lat 1.840 ms stddev 1.111, 0 failed
+progress: 12.0 s, 2104.9 tps, lat 1.899 ms stddev 1.847, 0 failed
+progress: 13.0 s, 2180.5 tps, lat 1.832 ms stddev 2.450, 0 failed
+progress: 14.0 s, 1431.2 tps, lat 2.792 ms stddev 2.735, 0 failed
+progress: 15.0 s, 2247.7 tps, lat 1.779 ms stddev 3.721, 0 failed
+progress: 16.0 s, 1992.1 tps, lat 2.004 ms stddev 6.482, 0 failed
+progress: 17.0 s, 2425.9 tps, lat 1.647 ms stddev 2.591, 0 failed
+progress: 18.0 s, 1840.1 tps, lat 2.175 ms stddev 4.514, 0 failed
+progress: 19.0 s, 2780.7 tps, lat 1.431 ms stddev 2.945, 0 failed
+progress: 20.0 s, 3082.2 tps, lat 1.301 ms stddev 2.005, 0 failed
+progress: 21.0 s, 6163.1 tps, lat 0.648 ms stddev 0.590, 0 failed
+progress: 22.0 s, 3655.5 tps, lat 1.092 ms stddev 2.792, 0 failed
+progress: 23.0 s, 5855.5 tps, lat 0.682 ms stddev 1.083, 0 failed
+progress: 24.0 s, 6395.9 tps, lat 0.624 ms stddev 0.568, 0 failed
+progress: 25.0 s, 5124.3 tps, lat 0.780 ms stddev 1.143, 0 failed
+progress: 26.0 s, 4866.9 tps, lat 0.821 ms stddev 2.912, 0 failed
+progress: 27.0 s, 4656.4 tps, lat 0.857 ms stddev 1.221, 0 failed
+progress: 28.0 s, 3977.1 tps, lat 1.003 ms stddev 1.206, 0 failed
+progress: 29.0 s, 3286.0 tps, lat 1.214 ms stddev 0.821, 0 failed
+progress: 30.0 s, 3993.3 tps, lat 1.000 ms stddev 0.674, 0 failed
+progress: 31.0 s, 4393.1 tps, lat 0.908 ms stddev 0.579, 0 failed
+progress: 32.0 s, 4113.8 tps, lat 0.969 ms stddev 0.556, 0 failed
+progress: 33.0 s, 4298.9 tps, lat 0.929 ms stddev 0.629, 0 failed
+progress: 34.0 s, 4144.2 tps, lat 0.963 ms stddev 0.791, 0 failed
+progress: 35.0 s, 4561.7 tps, lat 0.873 ms stddev 0.524, 0 failed
+progress: 36.0 s, 3872.3 tps, lat 1.032 ms stddev 0.649, 0 failed
+progress: 37.0 s, 2479.9 tps, lat 1.093 ms stddev 0.715, 0 failed
+progress: 38.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 39.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 40.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 41.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 42.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 43.0 s, 3392.0 tps, lat 7.458 ms stddev 199.833, 0 failed
+progress: 44.0 s, 6682.9 tps, lat 0.596 ms stddev 0.339, 0 failed
+progress: 45.0 s, 6943.5 tps, lat 0.573 ms stddev 0.403, 0 failed
+progress: 46.0 s, 7133.6 tps, lat 0.558 ms stddev 0.400, 0 failed
+progress: 47.0 s, 7601.7 tps, lat 0.524 ms stddev 0.345, 0 failed
+progress: 48.0 s, 8087.0 tps, lat 0.492 ms stddev 0.303, 0 failed
+progress: 49.0 s, 8344.9 tps, lat 0.477 ms stddev 0.288, 0 failed
+progress: 50.0 s, 8739.9 tps, lat 0.455 ms stddev 0.260, 0 failed
+progress: 51.0 s, 7810.0 tps, lat 0.510 ms stddev 0.389, 0 failed
+progress: 52.0 s, 7926.3 tps, lat 0.502 ms stddev 0.342, 0 failed
+pgbench: error: client 0 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 2 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 3 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 1 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: unexpected error status: 2

@@ -1,0 +1,38 @@
+progress: 1.0 s, 5561.8 tps, lat 0.712 ms stddev 0.248, 0 failed
+progress: 2.0 s, 5333.6 tps, lat 0.747 ms stddev 0.600, 0 failed
+progress: 3.0 s, 5403.0 tps, lat 0.739 ms stddev 0.294, 0 failed
+progress: 4.0 s, 5346.9 tps, lat 0.746 ms stddev 0.374, 0 failed
+progress: 5.0 s, 5576.2 tps, lat 0.715 ms stddev 0.337, 0 failed
+progress: 6.0 s, 5728.1 tps, lat 0.696 ms stddev 0.326, 0 failed
+progress: 7.0 s, 6012.8 tps, lat 0.663 ms stddev 0.330, 0 failed
+progress: 8.0 s, 6180.3 tps, lat 0.645 ms stddev 0.335, 0 failed
+progress: 9.0 s, 6199.3 tps, lat 0.643 ms stddev 0.319, 0 failed
+progress: 10.0 s, 6706.2 tps, lat 0.593 ms stddev 0.283, 0 failed
+progress: 11.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 12.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 13.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 14.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 15.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 16.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 17.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 18.1 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 19.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 20.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 21.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 22.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 23.0 s, 0.0 tps, lat 0.000 ms stddev 0.000, 0 failed
+progress: 24.0 s, 4407.1 tps, lat 13.065 ms stddev 415.065, 0 failed
+progress: 25.0 s, 10471.9 tps, lat 0.380 ms stddev 0.846, 0 failed
+progress: 26.0 s, 10625.8 tps, lat 0.375 ms stddev 0.161, 0 failed
+progress: 27.0 s, 9190.4 tps, lat 0.433 ms stddev 0.743, 0 failed
+progress: 28.0 s, 9743.5 tps, lat 0.408 ms stddev 0.264, 0 failed
+progress: 29.0 s, 10010.7 tps, lat 0.397 ms stddev 0.263, 0 failed
+progress: 30.0 s, 9284.9 tps, lat 0.428 ms stddev 0.242, 0 failed
+progress: 31.0 s, 10041.0 tps, lat 0.396 ms stddev 0.242, 0 failed
+progress: 32.0 s, 8116.8 tps, lat 0.490 ms stddev 0.307, 0 failed
+progress: 33.0 s, 8286.1 tps, lat 0.480 ms stddev 0.321, 0 failed
+pgbench: error: client 1 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 3 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 0 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: client 2 script 0 aborted in command 1 query 0: FATAL:  terminating connection due to administrator command
+pgbench: error: unexpected error status: 2
